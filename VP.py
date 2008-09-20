@@ -1,8 +1,12 @@
 from __future__ import division
-import os, sys
+import os, sys, copy
 import pygame
+import pygame.display
+import pygame.draw
+import pygame.event
+import pygame.font
+import pygame.time
 from pygame.locals import *
-import copy
 
 # ship class
 
@@ -44,6 +48,15 @@ class Vec(object):
 
     def __itr__(self):
         return itr(self.value)
+
+class BaseHexVec(object):
+    def __init__(self, direction, distance):
+        self.direction = direction
+        self.distance = distance
+
+    def vector(self):
+        return self.direction.vector() * distance
+
     
 class HexField(object):
     def __init__(self, width, height, scale = 2):
@@ -56,7 +69,6 @@ class HexField(object):
         pygame.display.set_mode(((self.width * 21 + 7) * self.scale,
                                  (self.height * 12 + 12) * self.scale))
                                 
-
     def draw_hex(self, x, y):
         xunit = 21 * self.scale
         yunit = 12 * self.scale
@@ -289,7 +301,7 @@ class Ship(Entity):
                 s = None
             except ShipError:
                 pass
- 
+
 if __name__ == "__main__":
     pygame.init()
     h = HexField(30,30)
@@ -297,7 +309,7 @@ if __name__ == "__main__":
     h.draw_field()
     
     s = Ship(1, Vec(15,15), Vec(0, 0), Direction(0),
-             ThrustSpec(6, 4, 1, 2))
+             ThrustSpec(5, 4, 2, 2))
     sprime = copy.deepcopy(s)
     sprime.update()
     sprimeprime = copy.deepcopy(sprime)
@@ -359,8 +371,6 @@ if __name__ == "__main__":
                     print "I don't recognize key: %s" % str(e.key)
 
             except ShipError:
-                print s
-                print sprime
                 surface = pygame.display.get_surface()
                 surface.fill((255, 255, 255))
                 pygame.display.flip()
