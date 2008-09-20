@@ -1,8 +1,8 @@
 from __future__ import division
 import os, sys
-from OpenGL.GL import *
 import pygame
 from pygame.locals import *
+import copy
 
 # ship class
 
@@ -25,11 +25,13 @@ class Vec(object):
     def __rmul__(self, other):
         return Vec(*tuple(other * i for i in self.value))
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         return Vec(*tuple(i / other for i in self.value))
 
+    __div__ = __truediv__
+
     def __getitem__(self, index):
-        return value[index]
+        return self.value[index]
 
     def __len__(self):
         return len(self.value)
@@ -40,6 +42,9 @@ class Vec(object):
     def __str__(self):
         return str(self.value)
 
+    def __itr__(self):
+        return itr(self.value)
+    
 class HexField(object):
     def __init__(self, width, height, scale = 2):
         self.width = width
@@ -68,7 +73,6 @@ class HexField(object):
 
     def draw_field(self):
         if self.hex_image is None:
-            print self.width, self.height
             self.hex_image = pygame.Surface(((self.width * 21 + 7) * self.scale,
                                              (self.height * 12 + 12) * self.scale))
             for i in range(0, self.width + 2, 2):
@@ -77,20 +81,32 @@ class HexField(object):
         screen = pygame.display.get_surface()
         screen.blit(self.hex_image, (0, 0))
                 
-    def to_display_coords(vec):
-        assert (vec[0] + vec[1]) % 2 == 0
-        return Vec(vec[0] * 42 + 28, vec[1] * 24 + 24)
-
+    def display_coords(self, vecs):
+        if isinstance(vecs, Vec):
+            return Vec(vecs[0] * 21 + 14, vecs[1] * 12 + 12) * self.scale
+        else:
+            return [Vec(v[0] * 21 + 14, v[1] * 12 + 12) * self.scale
+                    for v in vecs]
+        
+    def relative_display_coords(self, vecs):
+        if isinstance(vecs, Vec):
+            return Vec(vecs[0] * 21, vecs[1] * 12) * self.scale
+        else:
+            return [Vec(v[0] * 21, v[1] * 12) * self.scale
+                    for v in vecs]
+    
 class Direction(object):
     _instances = [None] * 6
     
     def __new__(cls, val):
-        assert 0 <= val < 6
         if cls._instances[val] is None:
             cls._instances[val] = object.__new__(cls)
             cls._instances[val].val = val
         return cls._instances[val]
-        
+
+    def __getnewargs__(self):
+        return (self.val,)
+    
     def inc(self):
         if self.val == 5:
             return Direction(0)
@@ -98,18 +114,7 @@ class Direction(object):
             return Direction(self.val + 1)
 
     def dec(self):
-        if self.val == 0:
-            return Direction(5)
-        else:
-            return Direction(self.val - 1)
-
-    def __sub__(self, other):
-        dif = self.val - other.val
-        if dif > 3:
-            dif -= 6
-        elif dif <= -3:
-            dif += 6
-        return dif
+        return Direction(self.val - 1) # negative values are ok
 
     _unit_vectors = [Vec(0, -2),
                      Vec(1, -1),
@@ -139,7 +144,7 @@ class Entity(object):
         self.vel += vector*2
 
     def boost(self, direction):
-        vector = direction.vector
+        vector = direction.vector()
         self.vel += vector
 
     def rotate(self, sign):
@@ -169,47 +174,69 @@ class ThrustSpec(object):
         return "ThrustSpec(%d, %d, %d, %d)" % (self.max_thrust, self.max_g,
                                                self.thrusters, self.spin_cost)
 
+class ShipError(ValueError):
+    pass
+
+class GLimit(ShipError):
+    pass
+
+class ThrustLimit(ShipError):
+    pass
+
+class IllegalCommand(ShipError):
+    pass
+
 class Ship(Entity):
     def __init__(self, id, pos, vel, orientation,
-                 thrust_spec, used_thrust = 0, used_g = 0):
+                 thrust_spec, color, used_thrust = 0, used_g = 0):
         Entity.__init__(self, id, pos, vel, orientation)
+        self.color = color
         self.thrust_spec = thrust_spec
         self.used_thrust = used_thrust
         self.used_g = used_g
         
     def thrust(self, direction):
-        assert self.used_thrust + 1 <= self.thrust_spec.max_thrust
-        assert self.used_g + 1 <= self.thrustspec.max_g
+        if self.used_thrust + 1 > self.thrust_spec.max_thrust:
+            raise ThrustLimit()
+        if self.used_g + 1 > self.thrust_spec.max_g:
+            raise GLimit()
         super(Ship, self).thrust(direction)
         self.used_thrust += 1
         self.used_g += 1
 
     def boost(self, direction):
-        assert self.used_thrust + 1 <= self.thrust_spec.max_thrust
-        assert self.used_g + 1 <= self.thrustspec.max_g
+        if self.used_thrust + 1 > self.thrust_spec.max_thrust:
+            raise ThrustLimit()
+        if self.used_g + 1 > self.thrust_spec.max_g:
+            raise GLimit()
         super(Ship, self).boost(direction)
         self.used_thrust += 1
         self.used_g += 1
         
     def rotate(self, direction):
-        assert self.used_thrust + self.thrust_spec.spin_cost <= \
-               self.thrust_spec.max_thrust
+        if self.used_thrust + self.thrust_spec.spin_cost > \
+           self.thrust_spec.max_thrust:
+            raise ThrustLimit()
         super(Ship, self).rotate(direction)
         self.used_thrust += self.thrust_spec.spin_cost        
 
     def command(self, c):
         assert 4 <= c <= 9
         if c == 8:
-            assert self.thrust_spec.thrusters == 1
+            if self.thrust_spec.thrusters != 1:
+                raise IllegalCommand()
             self.thrust(self.orientation)
         elif c == 5:
-            assert self.thrust_spec.thrusters == 1
+            if self.thrust_spec.thrusters != 1:
+                raise IllegalCommand()
             self.boost(self.orientation)
         elif c == 7:
-            assert self.thrust_spec.thrusters == 2
+            if self.thrust_spec.thrusters != 2:
+                raise IllegalCommand()
             self.thrust(self.orientation.dec())
         elif c == 9:
-            assert self.thrust_spec.thrusters == 2
+            if self.thrust_spec.thrusters != 2:
+                raise IllegalCommand()
             self.thrust(self.orientation.inc())
         elif c == 4:
             self.rotate(-1)
@@ -224,3 +251,48 @@ class Ship(Entity):
                                                  repr(self.orientation),
                                                  repr(self.thrust_spec),
                                                  self.used_thrust)
+    
+    def display_vecs(self, hexfield):
+        center = hexfield.display_coords(self.pos)
+        front = hexfield.relative_display_coords(self.orientation.vector())
+        left = hexfield.relative_display_coords(self.orientation.dec().vector())
+        right = hexfield.relative_display_coords(self.orientation.inc().vector())
+        return center, front, left, right
+
+    def draw_ship(self, hexfield):
+        center, front, left, right = self.display_vecs(hexfield)
+        l = [center + front * 1/3,
+             center + (front + right) * (-1/6),
+             center + (front + left) * (-1/6)]
+        pygame.draw.aalines(pygame.display.get_surface(), self.color, True, l)
+
+    def draw_front_arc(self, hexfield):
+        center, front, left, right = self.display_vecs(hexfield)
+        l = [center + (front * 3 + right * 2) * (3/40),
+             center + front * 3/8,
+             center + (front * 3 + left * 2) * (3/40)]
+        pygame.draw.aalines(pygame.display.get_surface(), self.color, False, l)
+        
+    def draw_all_moves(self, hexfield):
+        self.draw_front_arc(hexfield)
+        s = None
+        for c in [8, 7, 9, 4, 6]:
+            if s is None:
+                s = copy.deepcopy(self)
+            try:
+                s.command(c)
+                s.draw_all_moves(hexfield)
+                s = None
+            except ShipError:
+                pass
+
+if __name__ == "__main__":
+    pygame.init()
+    h = HexField(20,20)
+    h.setup_window()
+    h.draw_field()
+    pygame.display.flip()
+    pygame.event.set_allowed(None)
+    pygame.event.set_allowed(pygame.QUIT)
+#    pygame.event.wait()
+#    pygame.quit()
