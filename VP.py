@@ -1,5 +1,10 @@
 from __future__ import division
-import os, sys, copy
+
+import copy
+import math
+import os
+import sys
+
 import pygame
 import pygame.display
 import pygame.draw
@@ -49,14 +54,8 @@ class Vec(object):
     def __itr__(self):
         return itr(self.value)
 
-class BaseHexVec(object):
-    def __init__(self, direction, distance):
-        self.direction = direction
-        self.distance = distance
-
-    def vector(self):
-        return self.direction.vector() * distance
-
+    def magnitude(self):
+        return math.sqrt(sum(x*x for x in self.value))
     
 class HexField(object):
     def __init__(self, width, height, scale = 2):
@@ -69,6 +68,7 @@ class HexField(object):
         pygame.display.set_mode(((self.width * 21 + 7) * self.scale,
                                  (self.height * 12 + 12) * self.scale))
                                 
+
     def draw_hex(self, x, y):
         xunit = 21 * self.scale
         yunit = 12 * self.scale
@@ -288,6 +288,16 @@ class Ship(Entity):
              center + front * 3/8,
              center + (front * 3 + left * 2) * (3/40)]
         pygame.draw.aalines(pygame.display.get_surface(), color, False, l)
+
+    def draw_vel(self, hexfield, color):
+        start = hexfield.display_coords(self.pos)
+        end = start + hexfield.relative_display_coords(self.vel)
+        pygame.draw.aaline(pygame.display.get_surface(), color, start, end)
+
+    def draw_connection(self, hexfield, color, other):
+        start = hexfield.display_coords(self.pos)
+        end = hexfield.display_coords(other.pos)
+        pygame.draw.aaline(pygame.display.get_surface(), color, start, end)
         
     def draw_all_moves(self, hexfield, color):
         self.draw_front_arc(hexfield)
@@ -301,86 +311,92 @@ class Ship(Entity):
                 s = None
             except ShipError:
                 pass
-
-if __name__ == "__main__":
-    pygame.init()
-    h = HexField(30,30)
-    h.setup_window()
-    h.draw_field()
+ 
+class App(object):
+    def __init__(self):
+        pygame.init()
+        self.h = HexField(30,35)
+        self.h.setup_window()
+        self.h.draw_field()
     
-    s = Ship(1, Vec(15,15), Vec(0, 0), Direction(0),
-             ThrustSpec(5, 4, 2, 2))
-    sprime = copy.deepcopy(s)
-    sprime.update()
-    sprimeprime = copy.deepcopy(sprime)
-    sprimeprime.update()
-    
-    sprimeprime.draw_ship(h, (128, 128, 128))
-    sprime.draw_ship(h, (192, 192, 192))
-    s.draw_ship(h, (255, 255, 255))
-    pygame.display.flip()
-    
-    pygame.event.set_allowed(None)
-    pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
-    
-    loop = True
-    while loop:
-        e = pygame.event.wait()
-        if e.type == pygame.QUIT:
-            loop = False
-        elif e.type == pygame.KEYDOWN:
-            try:
-                if e.key == K_k or e.key == K_KP8:
-                    sprime.command(8)
-                    sprimeprime = copy.deepcopy(sprime)
-                    sprimeprime.update()
-                elif e.key == K_i or e.key == K_KP5:
-                    sprime.command(5)
-                    sprimeprime = copy.deepcopy(sprime)
-                    sprimeprime.update()
-                elif e.key == K_u or e.key == K_KP7:
-                    sprime.command(7)
-                    sprimeprime = copy.deepcopy(sprime)
-                    sprimeprime.update()
-                elif e.key == K_o or e.key == K_KP9:
-                    sprime.command(9)
-                    sprimeprime = copy.deepcopy(sprime)
-                    sprimeprime.update()
-                elif e.key == K_j or e.key == K_KP4:
-                    sprime.command(4)
-                    sprimeprime = copy.deepcopy(sprime)
-                    sprimeprime.update()
-                elif e.key == K_l or e.key == K_KP6:
-                    sprime.command(6)
-                    sprimeprime = copy.deepcopy(sprime)
-                    sprimeprime.update()
-                elif e.key == K_RETURN or e.key == K_KP_ENTER:
-                    s = sprime
-                    sprime = copy.deepcopy(s)
-                    sprime.update()
-                    sprimeprime = copy.deepcopy(sprime)
-                    sprimeprime.update()
-                elif e.key == K_x or e.key == K_KP0:
-                    sprime = copy.deepcopy(s)
-                    sprime.update()
-                    sprimeprime = copy.deepcopy(sprime)
-                    sprimeprime.update()
-                elif e.key == K_q or e.key == K_ESCAPE:
-                    loop = False
-                else:
-                    print "I don't recognize key: %s" % str(e.key)
+        self.s = Ship(1, Vec(15,15), Vec(0, 0), Direction(0),
+             ThrustSpec(6, 4, 1, 2))
 
-            except ShipError:
-                surface = pygame.display.get_surface()
-                surface.fill((255, 255, 255))
-                pygame.display.flip()
-                pygame.time.wait(40)
-
-        h.draw_field()
-        sprimeprime.draw_ship(h, (128, 128, 128))
-        sprime.draw_ship(h, (192, 192, 192))
-        s.draw_ship(h, (255, 255, 255))
-
+    def loop(self):
+        sprime = copy.deepcopy(self.s)
+        sprime.update()
+        sprimeprime = copy.deepcopy(sprime)
+        sprimeprime.update()
+    
+        sprimeprime.draw_ship(self.h, (128, 128, 128))
+        sprime.draw_ship(self.h, (192, 192, 192))
+        self.s.draw_ship(self.h, (255, 255, 255))
         pygame.display.flip()
-        
-    pygame.quit()
+    
+        pygame.event.set_allowed(None)
+        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
+    
+        loop = True
+        while loop:
+            e = pygame.event.wait()
+            if e.type == pygame.QUIT:
+                loop = False
+            elif e.type == pygame.KEYDOWN:
+                try:
+                    if e.key == K_k or e.key == K_KP8:
+                        sprime.command(8)
+                        sprimeprime = copy.deepcopy(sprime)
+                        sprimeprime.update()
+                    elif e.key == K_i or e.key == K_KP5:
+                        sprime.command(5)
+                        sprimeprime = copy.deepcopy(sprime)
+                        sprimeprime.update()
+                    elif e.key == K_u or e.key == K_KP7:
+                        sprime.command(7)
+                        sprimeprime = copy.deepcopy(sprime)
+                        sprimeprime.update()
+                    elif e.key == K_o or e.key == K_KP9:
+                        sprime.command(9)
+                        sprimeprime = copy.deepcopy(sprime)
+                        sprimeprime.update()
+                    elif e.key == K_j or e.key == K_KP4:
+                        sprime.command(4)
+                        sprimeprime = copy.deepcopy(sprime)
+                        sprimeprime.update()
+                    elif e.key == K_l or e.key == K_KP6:
+                        sprime.command(6)
+                        sprimeprime = copy.deepcopy(sprime)
+                        sprimeprime.update()
+                    elif e.key == K_RETURN or e.key == K_KP_ENTER:
+                        self.s = sprime
+                        sprime = copy.deepcopy(self.s)
+                        sprime.update()
+                        sprimeprime = copy.deepcopy(sprime)
+                        sprimeprime.update()
+                    elif e.key == K_x or e.key == K_KP0:
+                        sprime = copy.deepcopy(self.s)
+                        sprime.update()
+                        sprimeprime = copy.deepcopy(sprime)
+                        sprimeprime.update()
+                    elif e.key == K_q or e.key == K_ESCAPE:
+                        loop = False
+                    else:
+                        print "I don't recognize key: %s" % str(e.key)
+
+                except ShipError:
+                    surface = pygame.display.get_surface()
+                    surface.fill((255, 255, 255))
+                    pygame.display.flip()
+                    pygame.time.wait(40)
+
+            self.h.draw_field()
+            sprimeprime.draw_ship(self.h, (128, 128, 128))
+            sprime.draw_connection(self.h, (128, 128, 128), sprimeprime)
+            sprime.draw_ship(self.h, (192, 192, 192))
+            self.s.draw_connection(self.h, (192, 192, 192), sprime)
+            self.s.draw_ship(self.h, (255, 255, 255))
+
+            pygame.display.flip()
+
+        def __del__(self):
+            pygame.quit()
