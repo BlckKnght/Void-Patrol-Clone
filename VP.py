@@ -13,390 +13,128 @@ import pygame.font
 import pygame.time
 from pygame.locals import *
 
-# ship class
+from vpmath import Vec, Direction
+from hexfield import HexField
+from entity import Entity
+from ship import ThrustSpec, Ship, ShipError, \
+                 GLimit, ThrustLimit, IllegalCommand
 
-class Vec(object):
-    def __init__(self, *value):
-        if len(value) > 1:
-            self.value = value
-        else:
-            self.value = value[0]
-
-    def __add__(self, other):
-        return Vec(*tuple(i + j for i, j in zip(self.value, other.value)))
-
-    def __sub__(self, other):
-        return Vec(*tuple(i - j for i, j in zip(self.value, other.value)))
-
-    def __mul__(self, other):
-        return Vec(*tuple(i * other for i in self.value))
-
-    def __rmul__(self, other):
-        return Vec(*tuple(other * i for i in self.value))
-
-    def __truediv__(self, other):
-        return Vec(*tuple(i / other for i in self.value))
-
-    __div__ = __truediv__
-
-    def __getitem__(self, index):
-        return self.value[index]
-
-    def __len__(self):
-        return len(self.value)
-
-    def __repr__(self):
-        return "Vec(%s)" % repr(self.value)
-
-    def __str__(self):
-        return str(self.value)
-
-    def __itr__(self):
-        return itr(self.value)
-
-    def magnitude(self):
-        return math.sqrt(sum(x*x for x in self.value))
-    
-class HexField(object):
-    def __init__(self, width, height, scale = 2):
-        self.width = width
-        self.height = height
-        self.scale = scale
-        self.hex_image = None
-
-    def setup_window(self):
-        pygame.display.set_mode(((self.width * 21 + 7) * self.scale,
-                                 (self.height * 12 + 12) * self.scale))
-                                
-
-    def draw_hex(self, x, y):
-        xunit = 21 * self.scale
-        yunit = 12 * self.scale
-        pygame.draw.aalines(self.hex_image, (255, 255, 255), False,
-                            [((1/3 + x) * xunit, (2 + y) * yunit),
-                             ((      x) * xunit, (1 + y) * yunit),
-                             ((1/3 + x) * xunit, (    y) * yunit),
-                             ((1   + x) * xunit, (    y) * yunit),
-                             ((4/3 + x) * xunit, (1 + y) * yunit),
-                             ((1   + x) * xunit, (2 + y) * yunit)])
-        pygame.draw.aaline(self.hex_image, (255, 255, 255),
-                           ((4/3 + x) * xunit, (1 + y) * yunit),
-                           ((2   + x) * xunit, (1 + y) * yunit))
-
-    def draw_field(self):
-        if self.hex_image is None:
-            self.hex_image = pygame.Surface(((self.width * 21 + 7) * self.scale,
-                                             (self.height * 12 + 12) * self.scale))
-            for i in range(0, self.width + 2, 2):
-                for j in range(0, self.height + 2, 2):
-                    self.draw_hex(i, j)
-        screen = pygame.display.get_surface()
-        screen.blit(self.hex_image, (0, 0))
-                
-    def display_coords(self, vecs):
-        if isinstance(vecs, Vec):
-            return Vec(vecs[0] * 21 + 14, vecs[1] * 12 + 12) * self.scale
-        else:
-            return [Vec(v[0] * 21 + 14, v[1] * 12 + 12) * self.scale
-                    for v in vecs]
-        
-    def relative_display_coords(self, vecs):
-        if isinstance(vecs, Vec):
-            return Vec(vecs[0] * 21, vecs[1] * 12) * self.scale
-        else:
-            return [Vec(v[0] * 21, v[1] * 12) * self.scale
-                    for v in vecs]
-    
-class Direction(object):
-    _instances = [None] * 6
-    
-    def __new__(cls, val):
-        if cls._instances[val] is None:
-            cls._instances[val] = object.__new__(cls)
-            cls._instances[val].val = val
-        return cls._instances[val]
-
-    def __getnewargs__(self):
-        return (self.val,)
-    
-    def inc(self):
-        if self.val == 5:
-            return Direction(0)
-        else:
-            return Direction(self.val + 1)
-
-    def dec(self):
-        return Direction(self.val - 1) # negative values are ok
-
-    _unit_vectors = [Vec(0, -2),
-                     Vec(1, -1),
-                     Vec(1, 1),
-                     Vec(0, 2),
-                     Vec(-1, 1),
-                     Vec(-1, -1)]
-    def vector(self):
-        return self._unit_vectors[self.val]
-
-    def __repr__(self):
-        return "Direction(%d)" % self.val
-
-    def __str__(self):
-        return str(self.val)
-
-class Entity(object):
-    def __init__(self, id, pos, vel, orientation):
-        self.id = id
-        self.pos = pos
-        self.vel = vel
-        self.orientation = orientation
-
-    def thrust(self, direction):
-        vector = direction.vector()
-        self.pos += vector
-        self.vel += vector*2
-
-    def boost(self, direction):
-        vector = direction.vector()
-        self.vel += vector
-
-    def rotate(self, sign):
-        assert sign <> 0
-        if sign > 0:
-            self.orientation = self.orientation.inc()
-        else:
-            self.orientation = self.orientation.dec()
-
-    def update(self):
-        self.pos += self.vel
-
-    def __repr__(self):
-        return "Entity(%s, %s, %s, %s)" % (str(self.id),
-                                           str(self.pos),
-                                           str(self.vel),
-                                           str(self.orientation))
-
-class ThrustSpec(object):
-    def __init__(self, max_thrust, max_g, thrusters, spin_cost):
-        self.max_thrust = max_thrust
-        self.max_g = max_g
-        self.thrusters = thrusters
-        self.spin_cost = spin_cost
-
-    def __repr__(self):
-        return "ThrustSpec(%d, %d, %d, %d)" % (self.max_thrust, self.max_g,
-                                               self.thrusters, self.spin_cost)
-
-class ShipError(ValueError):
-    pass
-
-class GLimit(ShipError):
-    pass
-
-class ThrustLimit(ShipError):
-    pass
-
-class IllegalCommand(ShipError):
-    pass
-
-class Ship(Entity):
-    def __init__(self, id, pos, vel, orientation,
-                 thrust_spec, used_thrust = 0, used_g = 0):
-        Entity.__init__(self, id, pos, vel, orientation)
-        self.thrust_spec = thrust_spec
-        self.used_thrust = used_thrust
-        self.used_g = used_g
-        
-    def thrust(self, direction):
-        if self.used_thrust + 1 > self.thrust_spec.max_thrust:
-            raise ThrustLimit()
-        if self.used_g + 1 > self.thrust_spec.max_g:
-            raise GLimit()
-        super(Ship, self).thrust(direction)
-        self.used_thrust += 1
-        self.used_g += 1
-
-    def boost(self, direction):
-        if self.used_thrust + 1 > self.thrust_spec.max_thrust:
-            raise ThrustLimit()
-        if self.used_g + 1 > self.thrust_spec.max_g:
-            raise GLimit()
-        super(Ship, self).boost(direction)
-        self.used_thrust += 1
-        self.used_g += 1
-        
-    def rotate(self, direction):
-        if self.used_thrust + self.thrust_spec.spin_cost > \
-           self.thrust_spec.max_thrust:
-            raise ThrustLimit()
-        super(Ship, self).rotate(direction)
-        self.used_thrust += self.thrust_spec.spin_cost
-
-    def update(self):
-        self.used_thrust = 0
-        self.used_g = 0
-        super(Ship, self).update()
-        
-    def command(self, c):
-        assert 4 <= c <= 9
-        if c == 8:
-            if self.thrust_spec.thrusters != 1:
-                raise IllegalCommand()
-            self.thrust(self.orientation)
-        elif c == 5:
-            if self.thrust_spec.thrusters != 1:
-                raise IllegalCommand()
-            self.boost(self.orientation)
-        elif c == 7:
-            if self.thrust_spec.thrusters != 2:
-                raise IllegalCommand()
-            self.thrust(self.orientation.dec())
-        elif c == 9:
-            if self.thrust_spec.thrusters != 2:
-                raise IllegalCommand()
-            self.thrust(self.orientation.inc())
-        elif c == 4:
-            self.rotate(-1)
-        elif c == 6:
-            self.rotate(1)
-        else:
-            raise ValueError()
-
-    def __repr__(self):
-        return "Ship(%s, %s, %s, %s, %s, %d)" % (repr(self.id), repr(self.pos),
-                                                 repr(self.vel),
-                                                 repr(self.orientation),
-                                                 repr(self.thrust_spec),
-                                                 self.used_thrust)
-    
-    def display_vecs(self, hexfield):
-        center = hexfield.display_coords(self.pos)
-        front = hexfield.relative_display_coords(self.orientation.vector())
-        left = hexfield.relative_display_coords(self.orientation.dec().vector())
-        right = hexfield.relative_display_coords(self.orientation.inc().vector())
-        return center, front, left, right
-
-    def draw_ship(self, hexfield, color):
-        center, front, left, right = self.display_vecs(hexfield)
-        l = [center + front * 1/3,
-             center + (front + right) * (-1/6),
-             center + (front + left) * (-1/6)]
-        pygame.draw.aalines(pygame.display.get_surface(), color, True, l)
-
-    def draw_front_arc(self, hexfield, color):
-        center, front, left, right = self.display_vecs(hexfield)
-        l = [center + (front * 3 + right * 2) * (3/40),
-             center + front * 3/8,
-             center + (front * 3 + left * 2) * (3/40)]
-        pygame.draw.aalines(pygame.display.get_surface(), color, False, l)
-
-    def draw_vel(self, hexfield, color):
-        start = hexfield.display_coords(self.pos)
-        end = start + hexfield.relative_display_coords(self.vel)
-        pygame.draw.aaline(pygame.display.get_surface(), color, start, end)
-
-    def draw_connection(self, hexfield, color, other):
-        start = hexfield.display_coords(self.pos)
-        end = hexfield.display_coords(other.pos)
-        pygame.draw.aaline(pygame.display.get_surface(), color, start, end)
-        
-    def draw_all_moves(self, hexfield, color):
-        self.draw_front_arc(hexfield)
-        s = None
-        for c in [8, 7, 9, 4, 6]:
-            if s is None:
-                s = copy.deepcopy(self)
-            try:
-                s.command(c)
-                s.draw_all_moves(hexfield, color)
-                s = None
-            except ShipError:
-                pass
- 
 class App(object):
+
+    badger_spec = ThrustSpec(4, 3, 1, 1)
+    sparrowhawk_spec = ThrustSpec(4, 3, 2, 1)
+    lone_wolf_spec = ThrustSpec(5, 4, 2, 2)
+    javelin_spec = ThrustSpec(6, 4, 1, 2)
+    
     def __init__(self):
         pygame.init()
-        self.h = HexField(30,35)
-        self.h.setup_window()
-        self.h.draw_field()
     
-        self.s = Ship(1, Vec(15,15), Vec(0, 0), Direction(0),
-             ThrustSpec(6, 4, 1, 2))
+    def setup_window(self, width = 20, height = 30, scale = 2):
+        cX = width // 2
+        cY = height // 2
+        if (cX + cY) % 2 != 0:
+            cY += 1
+        self.h = HexField(width, height, Vec(cX, cY), scale)
+        self.h.setup_window()
+        self.h.set_top_text_fields(["Ship Name", "Ship Maneuverability", "Energy", "Gs"])
+        self.h.set_bottom_text_fields(["Notice"])
+        self.h.draw_field()
+
+    def setup_ship(self, name = "Badger", thrust_spec = badger_spec):
+        self.s = Ship(name, Vec(0,0), Vec(0, 0), Direction(0), thrust_spec)
+        self.h.set_top_text("Ship Name", str(self.s.id))
+        self.h.set_top_text("Ship Maneuverability", str(self.s.thrust_spec))
+        self.update()
+
+    def draw(self):
+        self.h.draw_field()
+        self.h.draw_text()
+        self.h.draw_single_hex(0, 0, (128, 0, 0))
+        self.sprimeprime.draw_all_moves(self.h, (128, 128, 128))
+        self.sprime.draw_all_moves(self.h, (255, 255, 255))
+        self.sprime.draw_connection(self.h, (128, 128, 128), self.sprimeprime)
+        self.s.draw_connection(self.h, (255, 255, 255), self.sprime)
+        self.sprime.draw_ship(self.h, (128, 128, 128))
+        self.s.draw_ship(self.h, (255, 255, 255))
+        
+        pygame.display.flip()
+
+    def update_step(self):
+        self.sprimeprime = copy.deepcopy(self.sprime)
+        self.sprimeprime.update()
+        self.h.set_top_text("Energy", "Energy: %d" %
+                                (self.sprime.thrust_spec.max_thrust - self.sprime.used_thrust))
+        self.h.set_top_text("Gs", "G load: %d" % self.sprime.used_g)
+        self.h.set_bottom_text("Notice", None)
+
+    def update(self):
+        self.sprime = copy.deepcopy(self.s)
+        self.sprime.update()
+        self.update_step()
 
     def loop(self):
-        sprime = copy.deepcopy(self.s)
-        sprime.update()
-        sprimeprime = copy.deepcopy(sprime)
-        sprimeprime.update()
-    
-        sprimeprime.draw_ship(self.h, (128, 128, 128))
-        sprime.draw_ship(self.h, (192, 192, 192))
-        self.s.draw_ship(self.h, (255, 255, 255))
-        pygame.display.flip()
-    
         pygame.event.set_allowed(None)
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
     
         loop = True
         while loop:
+            self.draw()
+            
             e = pygame.event.wait()
-            if e.type == pygame.QUIT:
-                loop = False
-            elif e.type == pygame.KEYDOWN:
+
+            if e.type == pygame.KEYDOWN:
                 try:
                     if e.key == K_k or e.key == K_KP8:
-                        sprime.command(8)
-                        sprimeprime = copy.deepcopy(sprime)
-                        sprimeprime.update()
+                        self.sprime.command(8)
+                        self.update_step()
                     elif e.key == K_i or e.key == K_KP5:
-                        sprime.command(5)
-                        sprimeprime = copy.deepcopy(sprime)
-                        sprimeprime.update()
+                        self.sprime.command(5)
+                        self.update_step()
                     elif e.key == K_u or e.key == K_KP7:
-                        sprime.command(7)
-                        sprimeprime = copy.deepcopy(sprime)
-                        sprimeprime.update()
+                        self.sprime.command(7)
+                        self.update_step()
                     elif e.key == K_o or e.key == K_KP9:
-                        sprime.command(9)
-                        sprimeprime = copy.deepcopy(sprime)
-                        sprimeprime.update()
+                        self.sprime.command(9)
+                        self.update_step()
                     elif e.key == K_j or e.key == K_KP4:
-                        sprime.command(4)
-                        sprimeprime = copy.deepcopy(sprime)
-                        sprimeprime.update()
+                        self.sprime.command(4)
+                        self.update_step()
                     elif e.key == K_l or e.key == K_KP6:
-                        sprime.command(6)
-                        sprimeprime = copy.deepcopy(sprime)
-                        sprimeprime.update()
+                        self.sprime.command(6)
+                        self.update_step()
                     elif e.key == K_RETURN or e.key == K_KP_ENTER:
-                        self.s = sprime
-                        sprime = copy.deepcopy(self.s)
-                        sprime.update()
-                        sprimeprime = copy.deepcopy(sprime)
-                        sprimeprime.update()
+                        self.s = self.sprime
+                        self.update()
                     elif e.key == K_x or e.key == K_KP0:
-                        sprime = copy.deepcopy(self.s)
-                        sprime.update()
-                        sprimeprime = copy.deepcopy(sprime)
-                        sprimeprime.update()
+                        self.update()
+                    elif e.key == K_F1:
+                        self.setup_ship("Badger", self.badger_spec)
+                    elif e.key == K_F2:
+                        self.setup_ship("Sparrowhawk", self.sparrowhawk_spec)
+                    elif e.key == K_F3:
+                        self.setup_ship("Lone Wolf", self.lone_wolf_spec)
+                    elif e.key == K_F4:
+                        self.setup_ship("Javelin", self.javelin_spec)
                     elif e.key == K_q or e.key == K_ESCAPE:
                         loop = False
                     else:
                         print "I don't recognize key: %s" % str(e.key)
 
-                except ShipError:
-                    surface = pygame.display.get_surface()
-                    surface.fill((255, 255, 255))
-                    pygame.display.flip()
-                    pygame.time.wait(40)
-
-            self.h.draw_field()
-            sprimeprime.draw_ship(self.h, (128, 128, 128))
-            sprime.draw_connection(self.h, (128, 128, 128), sprimeprime)
-            sprime.draw_ship(self.h, (192, 192, 192))
-            self.s.draw_connection(self.h, (192, 192, 192), sprime)
-            self.s.draw_ship(self.h, (255, 255, 255))
-
-            pygame.display.flip()
-
-        def __del__(self):
-            pygame.quit()
+                except ThrustLimit:
+                    self.h.set_bottom_text("Notice", "Thrust limit exceeded!")
+                except GLimit:
+                    self.h.set_bottom_text("Notice", "G limit exceeded!")
+                except IllegalCommand:
+                    self.h.set_bottom_text("Notice", "Illegal command for this fighter!")
+                    
+            elif e.type == pygame.QUIT:
+                loop = False
+            
+if __name__ == "__main__":
+    try:
+        a = App()
+        a.setup_window(31, 41, 2)
+        a.setup_ship()
+        a.loop()
+    finally:
+        pygame.quit()
