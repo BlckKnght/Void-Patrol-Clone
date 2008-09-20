@@ -1,3 +1,4 @@
+from __future__ import division
 import os, sys
 from OpenGL.GL import *
 import pygame
@@ -40,26 +41,39 @@ class Vec(object):
         return str(self.value)
 
 class HexField(object):
-    def __init__(self, width, height):
+    def __init__(self, width, height, scale = 2):
         self.width = width
         self.height = height
+        self.scale = scale
         self.hex_image = None
 
+    def setup_window(self):
+        pygame.display.set_mode(((self.width * 21 + 7) * self.scale,
+                                 (self.height * 12 + 12) * self.scale))
+                                
+
     def draw_hex(self, x, y):
+        xunit = 21 * self.scale
+        yunit = 12 * self.scale
         pygame.draw.aalines(self.hex_image, (255, 255, 255), False,
-                            [(14+x,48+y), (0+x, 24+y), (14+x, 0+y),
-                             (42+x, 0+y), (56+x, 24+y), (42+x, 48+y)])
+                            [((1/3 + x) * xunit, (2 + y) * yunit),
+                             ((      x) * xunit, (1 + y) * yunit),
+                             ((1/3 + x) * xunit, (    y) * yunit),
+                             ((1   + x) * xunit, (    y) * yunit),
+                             ((4/3 + x) * xunit, (1 + y) * yunit),
+                             ((1   + x) * xunit, (2 + y) * yunit)])
         pygame.draw.aaline(self.hex_image, (255, 255, 255),
-                           (56+x, 24+y), (84+x, 24+y))
+                           ((4/3 + x) * xunit, (1 + y) * yunit),
+                           ((2   + x) * xunit, (1 + y) * yunit))
 
     def draw_field(self):
         if self.hex_image is None:
             print self.width, self.height
-            self.hex_image = pygame.Surface((self.width * 84,
-                                             self.height * 48))
-            for i in range(self.width // 2):
-                for j in range(self.height // 2):
-                    self.draw_hex(i * 84, j * 48)
+            self.hex_image = pygame.Surface(((self.width * 21 + 7) * self.scale,
+                                             (self.height * 12 + 12) * self.scale))
+            for i in range(0, self.width + 2, 2):
+                for j in range(0, self.height + 2, 2):
+                    self.draw_hex(i, j)
         screen = pygame.display.get_surface()
         screen.blit(self.hex_image, (0, 0))
                 
