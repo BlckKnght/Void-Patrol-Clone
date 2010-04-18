@@ -98,15 +98,6 @@ class Ship(Entity):
                                                repr(self.thrust_spec),
                                                self.used_thrust)
     
-    def display_vecs(self, hexfield):
-        center, front, left, right = \
-                hexfield.display_coords((self.pos,
-                                         self.orientation.vector(),
-                                         self.orientation.dec().vector(),
-                                         self.orientation.inc().vector()))
-        center += hexfield.origin_coords()
-        return center, front, left, right
-
     def draw_ship(self, hexfield, color):
         center, front, left, right = self.display_vecs(hexfield)
         l = [center + front * 1/3,
@@ -114,23 +105,6 @@ class Ship(Entity):
              center + (front + left) * (-1/6)]
         pygame.draw.aalines(pygame.display.get_surface(), color, True, l)
 
-    def draw_front_arc(self, hexfield, color):
-        center, front, left, right = self.display_vecs(hexfield)
-        l = [center + (front * 3 + right * 2) * (3/40),
-             center + front * 3/8,
-             center + (front * 3 + left * 2) * (3/40)]
-        pygame.draw.aalines(pygame.display.get_surface(), color, False, l)
-
-    def draw_vel(self, hexfield, color):
-        start = hexfield.display_coords(self.pos) + hexfield.origin_coords()
-        end = start + hexfield.display_coords(self.vel)
-        pygame.draw.aaline(pygame.display.get_surface(), color, start, end)
-
-    def draw_connection(self, hexfield, color, other):
-        start = hexfield.display_coords(self.pos) + hexfield.origin_coords()
-        end = hexfield.display_coords(other.pos) + hexfield.origin_coords()
-        pygame.draw.aaline(pygame.display.get_surface(), color, start, end)
-        
     def draw_all_moves(self, hexfield, color, visited = None):
         if visited == None:
             visited = {}
