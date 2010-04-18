@@ -29,7 +29,7 @@ class ThrustSpec(object):
 class Ship(Entity):
     def __init__(self, id, pos, vel, orientation,
                  thrust_spec, used_thrust = 0, used_g = 0):
-        Entity.__init__(self, id, pos, vel, orientation)
+        super(Ship, self).__init__(id, pos, vel, orientation)
         self.thrust_spec = thrust_spec
         self.used_thrust = used_thrust
         self.used_g = used_g
@@ -52,11 +52,11 @@ class Ship(Entity):
         self.used_thrust += 1
         self.used_g += 1
         
-    def rotate(self, direction):
+    def rotate(self, sign):
         if self.used_thrust + self.thrust_spec.spin_cost > \
            self.thrust_spec.max_thrust:
             raise ThrustLimit()
-        super(Ship, self).rotate(direction)
+        super(Ship, self).rotate(sign)
         self.used_thrust += self.thrust_spec.spin_cost
 
     def update(self):
@@ -90,12 +90,13 @@ class Ship(Entity):
             raise ValueError()
 
     def __repr__(self):
-        return "Ship(%s, %s, %s, %s, %s, %d)" % (repr(self.id),
-                                                 repr(self.pos),
-                                                 repr(self.vel),
-                                                 repr(self.orientation),
-                                                 repr(self.thrust_spec),
-                                                 self.used_thrust)
+        return "%s(%s, %s, %s, %s, %s, %d)" % (self.__class__.__name__,
+                                               repr(self.id),
+                                               repr(self.pos),
+                                               repr(self.vel),
+                                               repr(self.orientation),
+                                               repr(self.thrust_spec),
+                                               self.used_thrust)
     
     def display_vecs(self, hexfield):
         center, front, left, right = \

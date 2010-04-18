@@ -49,7 +49,6 @@ class HexField(object):
                            ((2   + x) * xunit, (1 + y) * yunit))
 
     def draw_single_hex(self, x, y, color):
-        print "foo: (%d, %d)" % (x, y)
         xunit = 21 * self.scale
         yunit = 12 * self.scale
         pygame.draw.aalines(self.hex_image, color, True,

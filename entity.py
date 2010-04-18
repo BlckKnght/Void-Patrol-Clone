@@ -19,7 +19,7 @@ class Entity(object):
         self.vel += vector
 
     def rotate(self, sign):
-        assert sign <> 0
+        assert sign != 0
         if sign > 0:
             self.orientation = self.orientation.inc()
         else:
