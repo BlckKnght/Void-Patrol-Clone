@@ -83,8 +83,10 @@ class HexVec(object):
         #   b = (y-a)/2
         b = (vec[1]-a)/2
 
-        if not isinstance(b, int):
-            print vec
+        ib = int(b)
+
+        if b == ib:
+            b = ib
 
         return HexVec(a, b)
 
