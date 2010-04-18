@@ -13,7 +13,7 @@ import pygame.font
 import pygame.time
 from pygame.locals import *
 
-from vpmath import Vec, Direction
+from vpmath import Vec, Direction, HexVec
 from hexfield import HexField
 from entity import Entity
 from ship import ThrustSpec, Ship, ShipError, \
@@ -22,9 +22,9 @@ from ship import ThrustSpec, Ship, ShipError, \
 class App(object):
 
     badger_spec = ThrustSpec(4, 3, 1, 1)
+    javelin_spec = ThrustSpec(6, 4, 1, 2)
     sparrowhawk_spec = ThrustSpec(4, 3, 2, 1)
     lone_wolf_spec = ThrustSpec(5, 4, 2, 2)
-    javelin_spec = ThrustSpec(6, 4, 1, 2)
     
     def __init__(self):
         pygame.init()
@@ -37,7 +37,7 @@ class App(object):
         self.h = HexField(width, height, Vec(cX, cY), scale)
         self.h.setup_window()
         self.h.set_top_text_fields(["Ship Name", "Ship Maneuverability", "Energy", "Gs"])
-        self.h.set_bottom_text_fields(["Notice"])
+        self.h.set_bottom_text_fields(["Velocity", "Position", "Notice"])
         self.h.draw_field()
 
     def setup_ship(self, name = "Badger", thrust_spec = badger_spec):
@@ -65,6 +65,11 @@ class App(object):
         self.h.set_top_text("Energy", "Energy: %d" %
                                 (self.sprime.thrust_spec.max_thrust - self.sprime.used_thrust))
         self.h.set_top_text("Gs", "G load: %d" % self.sprime.used_g)
+        self.h.set_bottom_text("Position", "Position: %s" % HexVec.from_vector(self.sprime.pos))
+        hv = HexVec.from_vector(self.sprime.vel)
+        self.h.set_bottom_text("Velocity", "Speed: %d (%s)" % (abs(hv),
+                                                               " + ".join("%dx%s" % tuple(reversed(c))
+                                                                          for c in hv.components())))
         self.h.set_bottom_text("Notice", None)
 
     def update(self):
@@ -110,11 +115,11 @@ class App(object):
                     elif e.key == K_F1:
                         self.setup_ship("Badger", self.badger_spec)
                     elif e.key == K_F2:
-                        self.setup_ship("Sparrowhawk", self.sparrowhawk_spec)
-                    elif e.key == K_F3:
-                        self.setup_ship("Lone Wolf", self.lone_wolf_spec)
-                    elif e.key == K_F4:
                         self.setup_ship("Javelin", self.javelin_spec)
+                    elif e.key == K_F3:
+                        self.setup_ship("Sparrowhawk", self.sparrowhawk_spec)
+                    elif e.key == K_F4:
+                        self.setup_ship("Lone Wolf", self.lone_wolf_spec)
                     elif e.key == K_q or e.key == K_ESCAPE:
                         loop = False
                     else:
@@ -133,7 +138,7 @@ class App(object):
 if __name__ == "__main__":
     try:
         a = App()
-        a.setup_window(31, 41, 2)
+        a.setup_window(50, 50, 1)
         a.setup_ship()
         a.loop()
     finally:
