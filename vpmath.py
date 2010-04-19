@@ -10,6 +10,12 @@ class Vec(object):
         else:
             self.value = value[0]
 
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __ne__(self, other):
+        return self.value != other.value
+
     def __add__(self, other):
         return Vec(*tuple(i + j for i, j in zip(self.value, other.value)))
 
@@ -126,7 +132,7 @@ class HexVec(object):
     def components(self):
         """Return hex-aligned vectors which add up to this one.
 
-        The return value value will be a list of (direction, distance) tuples.
+        The return value value will be a list of [direction, distance] lists.
         There will be between zero and two elements in the list. If there are
         two, the directions will be adjacent to one another and the first
         distance will be greater than or equal to the second.
@@ -143,30 +149,30 @@ class HexVec(object):
         if aa >= ab and aa >= ac:
             if self.a > 0:
                 #print "a+"
-                components = [(Direction(1), ab),
-                              (Direction(2), ac)]
+                components = [[Direction(1), ab],
+                              [Direction(2), ac]]
             else:
                 #print "a-"
-                components = [(Direction(4), ab),
-                              (Direction(5), ac)]
+                components = [[Direction(4), ab],
+                              [Direction(5), ac]]
         elif ab >= aa and ab >= ac:
             if self.b > 0:
                 #print "b+"
-                components = [(Direction(3), ac),
-                              (Direction(4), aa)]
+                components = [[Direction(3), ac],
+                              [Direction(4), aa]]
             else:
                 #print "b-"
-                components = [(Direction(0), ac),
-                              (Direction(1), aa)]
+                components = [[Direction(0), ac],
+                              [Direction(1), aa]]
         else:
             if self.c > 0:
                 #print "c+"
-                components = [(Direction(5), aa),
-                              (Direction(0), ab)]
+                components = [[Direction(5), aa],
+                              [Direction(0), ab]]
             else:
                 #print "c-"
-                components = [(Direction(2), aa),
-                              (Direction(3), ab)]
+                components = [[Direction(2), aa],
+                              [Direction(3), ab]]
 
         #print components
 
@@ -207,7 +213,7 @@ class Direction(object):
 
     def __sub__(self, rhs):
         if isinstance(rhs, Direction):
-            return (self.val - rhs.val - 3) % 6 + 3
+            return (self.val - rhs.val + 2) % 6 - 2
         else:
             return Direction(self.val - amount)
 

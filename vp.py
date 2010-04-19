@@ -18,6 +18,7 @@ from hexfield import HexField
 from entity import Entity
 from ship import ThrustSpec, Ship, ShipError, \
                  GLimit, ThrustLimit, IllegalCommand
+from missile import Missile
 
 class App(object):
 
@@ -42,26 +43,49 @@ class App(object):
 
     def setup_ship(self, name = "Badger", thrust_spec = badger_spec):
         self.s = Ship(name, Vec(0,0), Vec(0, 0), Direction(0), thrust_spec)
+
         self.h.set_top_text("Ship Name", str(self.s.id))
         self.h.set_top_text("Ship Maneuverability", str(self.s.thrust_spec))
-        self.update()
+
+    def setup_missiles(self):
+        self.missiles = []
+        self.missile_number = 0
+
+    def add_missile(self, thrust):
+        m = Missile("Missile %d" % self.missile_number,
+                    Vec(0, 0), Vec(0, 0), Direction(0), thrust)
+
+        self.missiles.append(m)
 
     def draw(self):
         self.h.draw_field()
         self.h.draw_text()
-        self.h.draw_single_hex(0, 0, (128, 0, 0))
+        #self.h.draw_single_hex(0, 0, (128, 0, 0))
+
         self.sprimeprime.draw_all_moves(self.h, (128, 128, 128))
         self.sprime.draw_all_moves(self.h, (255, 255, 255))
         self.sprime.draw_connection(self.h, (128, 128, 128), self.sprimeprime)
         self.s.draw_connection(self.h, (255, 255, 255), self.sprime)
         self.sprime.draw_ship(self.h, (128, 128, 128))
         self.s.draw_ship(self.h, (255, 255, 255))
+
+        for i in range(len(self.missiles)):
+            self.missiles[i].draw_vel(self.h, (128, 128, 0))
+            self.mprime[i].draw_vel(self.h, (128, 128, 0))
+            self.missiles[i].draw_connection(self.h, (255, 255, 0), self.mprime[i])
+            self.mprime[i].draw_missile(self.h, (128, 128, 0))
+            self.missiles[i].draw_missile(self.h, (255, 255, 0))
         
         pygame.display.flip()
 
     def update_step(self):
         self.sprimeprime = copy.deepcopy(self.sprime)
         self.sprimeprime.update()
+        self.mprime = [copy.deepcopy(m) for m in self.missiles]
+        for mp in self.mprime:
+            mp.update()
+            mp.berserk_seek(self.sprime)
+
         self.h.set_top_text("Energy", "Energy: %d" %
                                 (self.sprime.thrust_spec.max_thrust - self.sprime.used_thrust))
         self.h.set_top_text("Gs", "G load: %d" % self.sprime.used_g)
@@ -109,17 +133,29 @@ class App(object):
                         self.update_step()
                     elif e.key == K_RETURN or e.key == K_KP_ENTER:
                         self.s = self.sprime
+##                        print [m.pos - self.s.pos for m in self.mprime]
+                        self.missiles = [m for m in self.mprime if m.pos != self.s.pos]
                         self.update()
                     elif e.key == K_x or e.key == K_KP0:
                         self.update()
                     elif e.key == K_F1:
                         self.setup_ship("Badger", self.badger_spec)
+                        self.update()
                     elif e.key == K_F2:
                         self.setup_ship("Javelin", self.javelin_spec)
+                        self.update()
                     elif e.key == K_F3:
                         self.setup_ship("Sparrowhawk", self.sparrowhawk_spec)
+                        self.update()
                     elif e.key == K_F4:
                         self.setup_ship("Lone Wolf", self.lone_wolf_spec)
+                        self.update()
+                    elif e.key == K_F5:
+                        self.add_missile(7)
+                        self.update_step()
+                    elif e.key == K_F6:
+                        self.add_missile(9)
+                        self.update_step()
                     elif e.key == K_q or e.key == K_ESCAPE:
                         loop = False
                     else:
@@ -140,6 +176,8 @@ if __name__ == "__main__":
         a = App()
         a.setup_window(50, 50, 1)
         a.setup_ship()
+        a.setup_missiles()
+        a.update()
         a.loop()
     finally:
         pygame.quit()
