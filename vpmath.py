@@ -114,7 +114,8 @@ class HexVec(object):
         return HexVec(self.a / scalar,
                       self.b / scalar)
 
-    __div__ = __truediv__
+    def __floordiv__(self, scalar):
+        return (self / scalar).round()
 
     def __hash__(self):
         return hash((self.a, self.b))
@@ -185,6 +186,31 @@ class HexVec(object):
             del components[1]
 
         return components
+
+    def round(self):
+        if isinstance(self.a, int) and isinstance(self.b, int):
+            return self
+
+        ia = int(round(self.a))
+        ib = int(round(self.b))
+        ic = int(round(self.c))
+
+        s = ia + ib + ic
+
+        if s != 0:
+            aa = abs(self.a-ia)
+            ab = abs(self.b-ib)
+            ac = abs(self.c-ic)
+
+            if aa >= ab and aa >= ac:
+                ia -= s
+            elif ab >= aa and ab >= ac:
+                ib -= s
+            else: #ac > aa and ac > ab
+                #ic -= s
+                pass
+
+        return HexVec(ia, ib)
 
 
 # 6-way direction, has exactly six instances.

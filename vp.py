@@ -84,7 +84,7 @@ class App(object):
         self.mprime = [copy.deepcopy(m) for m in self.missiles]
         for mp in self.mprime:
             mp.update()
-            mp.berserk_seek(self.sprime)
+            mp.smart_seek(self.sprime)
 
         self.h.set_top_text("Energy", "Energy: %d" %
                                 (self.sprime.thrust_spec.max_thrust - self.sprime.used_thrust))
@@ -151,10 +151,10 @@ class App(object):
                         self.setup_ship("Lone Wolf", self.lone_wolf_spec)
                         self.update()
                     elif e.key == K_F5:
-                        self.add_missile(7)
+                        self.add_missile(5)
                         self.update_step()
                     elif e.key == K_F6:
-                        self.add_missile(9)
+                        self.add_missile(6)
                         self.update_step()
                     elif e.key == K_q or e.key == K_ESCAPE:
                         loop = False
