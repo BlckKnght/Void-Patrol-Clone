@@ -174,7 +174,7 @@ class App(object):
 if __name__ == "__main__":
     try:
         a = App()
-        a.setup_window(50, 50, 1)
+        a.setup_window(50, 75, 1)
         a.setup_ship()
         a.setup_missiles()
         a.update()
