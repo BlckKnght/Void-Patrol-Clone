@@ -6,6 +6,8 @@ import pygame
 import pygame.display
 import pygame.draw
 
+from vpmath import HexVec
+
 class Entity(object):
     def __init__(self, id, pos, vel, orientation):
         self.id = id
@@ -14,20 +16,20 @@ class Entity(object):
         self.orientation = orientation
 
     def thrust(self, direction):
-        vector = direction.vector()
-        self.pos += vector
-        self.vel += vector*2
+        hv = HexVec(direction)
+        self.pos += hv
+        self.vel += hv*2
 
     def boost(self, direction):
-        vector = direction.vector()
-        self.vel += vector
+        hv = HexVec(direction)
+        self.vel += hv
 
     def rotate(self, sign):
         assert sign != 0
         if sign > 0:
-            self.orientation = self.orientation.inc()
+            self.orientation += 1
         else:
-            self.orientation = self.orientation.dec()
+            self.orientation -= 1
 
     def update(self):
         self.pos += self.vel
@@ -41,9 +43,9 @@ class Entity(object):
     def display_vecs(self, hexfield):
         center, front, left, right = \
                 hexfield.display_coords((self.pos,
-                                         self.orientation.vector(),
-                                         self.orientation.dec().vector(),
-                                         self.orientation.inc().vector()))
+                                         self.orientation,
+                                         self.orientation - 1,
+                                         self.orientation + 1))
         center += hexfield.origin_coords()
         return center, front, left, right
 

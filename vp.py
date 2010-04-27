@@ -42,7 +42,8 @@ class App(object):
         self.h.draw_field()
 
     def setup_ship(self, name = "Badger", thrust_spec = badger_spec):
-        self.s = Ship(name, Vec(0,0), Vec(0, 0), Direction(0), thrust_spec)
+        self.s = Ship(name, HexVec(Vec(0,0)), HexVec(Vec(0, 0)),
+                      Direction(0), thrust_spec)
 
         self.h.set_top_text("Ship Name", str(self.s.id))
         self.h.set_top_text("Ship Maneuverability", str(self.s.thrust_spec))
@@ -53,7 +54,8 @@ class App(object):
 
     def add_missile(self, thrust):
         m = Missile("Missile %d" % self.missile_number,
-                    Vec(0, 0), Vec(0, 0), Direction(0), thrust)
+                    HexVec(Vec(0, 0)), HexVec(Vec(0, 0)),
+                    Direction(0), thrust)
 
         self.missiles.append(m)
 
@@ -87,13 +89,14 @@ class App(object):
             mp.smart_seek(self.sprime)
 
         self.h.set_top_text("Energy", "Energy: %d" %
-                                (self.sprime.thrust_spec.max_thrust - self.sprime.used_thrust))
+                                (self.sprime.thrust_spec.max_thrust -
+                                 self.sprime.used_thrust))
         self.h.set_top_text("Gs", "G load: %d" % self.sprime.used_g)
-        self.h.set_bottom_text("Position", "Position: %s" % HexVec.from_vector(self.sprime.pos))
-        hv = HexVec.from_vector(self.sprime.vel)
-        self.h.set_bottom_text("Velocity", "Speed: %d (%s)" % (abs(hv),
-                                                               " + ".join("%dx%s" % tuple(reversed(c))
-                                                                          for c in hv.components())))
+        self.h.set_bottom_text("Position", "Position: %s" % self.sprime.pos)
+        self.h.set_bottom_text("Velocity", "Speed: %d (%s)" %
+                                   (abs(self.sprime.vel),
+                                    " + ".join("%dx%s" % tuple(reversed(c))
+                                               for c in self.sprime.vel.components())))
         self.h.set_bottom_text("Notice", None)
 
     def update(self):

@@ -19,12 +19,10 @@ class Missile(Entity):
         self.max_thrust = max_thrust
 
     def berserk_seek(self, target):
-        target_vector = target.pos - self.pos
-        target_hexvec = HexVec.from_vector(target_vector)
+        target_hexvec = target.pos - self.pos
 
         components = target_hexvec.components()
 
-##        print target_vector
 ##        print target_hexvec
 ##        print components
 
@@ -85,11 +83,8 @@ class Missile(Entity):
         if self.pos == target.pos:
             return
 
-        pos_vec = target.pos - self.pos
-        vel_vec = target.vel - self.vel
-
-        pos_hv = HexVec.from_vector(pos_vec)
-        vel_hv = HexVec.from_vector(vel_vec)
+        pos_hv = target.pos - self.pos
+        vel_hv = target.vel - self.vel
 
         for lookahead in itertools.count(): # will increase forever!
             seek_hv = pos_hv + vel_hv * lookahead
