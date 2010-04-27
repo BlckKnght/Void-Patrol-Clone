@@ -216,7 +216,7 @@ class HexVec(object):
 # 6-way direction, has exactly six instances.
 class Direction(object):
     _instances = [None] * 6
-    
+
     def __new__(cls, val):
         val %= 6
         if cls._instances[val] is None:

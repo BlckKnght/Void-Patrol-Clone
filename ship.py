@@ -33,7 +33,7 @@ class Ship(Entity):
         self.thrust_spec = thrust_spec
         self.used_thrust = used_thrust
         self.used_g = used_g
-        
+
     def thrust(self, direction):
         if self.used_thrust + 1 > self.thrust_spec.max_thrust:
             raise ThrustLimit()
@@ -51,7 +51,7 @@ class Ship(Entity):
         super(Ship, self).boost(direction)
         self.used_thrust += 1
         self.used_g += 1
-        
+
     def rotate(self, sign):
         if self.used_thrust + self.thrust_spec.spin_cost > \
            self.thrust_spec.max_thrust:
@@ -63,7 +63,7 @@ class Ship(Entity):
         self.used_thrust = 0
         self.used_g = 0
         super(Ship, self).update()
-        
+
     def command(self, c):
         assert 4 <= c <= 9
         if c == 8:
@@ -97,7 +97,7 @@ class Ship(Entity):
                                                repr(self.orientation),
                                                repr(self.thrust_spec),
                                                self.used_thrust)
-    
+
     def draw_ship(self, hexfield, color):
         center, front, left, right = self.display_vecs(hexfield)
         l = [center + front * 1/3,
@@ -108,14 +108,14 @@ class Ship(Entity):
     def draw_all_moves(self, hexfield, color, visited = None):
         if visited == None:
             visited = {}
-            
+
         state = (self.pos[0], self.pos[1], self.orientation)
         if visited.has_key(state):
             if visited[state] <= self.used_thrust:
                 return
         else:
             self.draw_front_arc(hexfield, color)
-                
+
         visited[state] = self.used_thrust
 
         s = None

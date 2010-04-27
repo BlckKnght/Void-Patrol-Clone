@@ -21,7 +21,7 @@ class HexField(object):
         self.hex_image = None
 
         self.font = pygame.font.SysFont("Arial", 12 * self.scale)
-        
+
         self.top_text_fields = []
         self.top_text = {}
         self.top_images = {}
@@ -33,7 +33,7 @@ class HexField(object):
     def setup_window(self):
         pygame.display.set_mode(((self.width * 21 + 7) * self.scale,
                                  (self.height * 12 + 12) * self.scale))
-        
+
     def draw_hex_tile(self, x, y):
         xunit = 21 * self.scale
         yunit = 12 * self.scale
@@ -88,11 +88,11 @@ class HexField(object):
                 screen.blit(image, (0, offset))
             except KeyError:
                 pass
-            
+
     def origin_coords(self):
         return Vec(self.origin[0] * 21 + 14,
                    self.origin[1] * 12 + 12) * self.scale
-    
+
     def display_coords(self, vecs):
         if isinstance(vecs, Vec):
             return Vec(vecs[0] * 21, vecs[1] * 12) * self.scale
@@ -111,7 +111,7 @@ class HexField(object):
             except KeyError:
                 pass
             return
-        
+
         try:
             if self.top_text[field] == new_text:
                 return
@@ -122,7 +122,6 @@ class HexField(object):
         self.top_images[field] = self.font.render(new_text, True,
                                                   (255, 255, 255),
                                                   (0, 0, 0))
-
 
     def set_bottom_text_fields(self, fields):
         self.bottom_text_fields = fields
@@ -135,8 +134,7 @@ class HexField(object):
             except KeyError:
                 pass
             return
-            
-            
+
         try:    
             if self.bottom_text[field] == new_text:
                 return

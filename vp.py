@@ -26,10 +26,10 @@ class App(object):
     javelin_spec = ThrustSpec(6, 4, 1, 2)
     sparrowhawk_spec = ThrustSpec(4, 3, 2, 1)
     lone_wolf_spec = ThrustSpec(5, 4, 2, 2)
-    
+
     def __init__(self):
         pygame.init()
-    
+
     def setup_window(self, width = 20, height = 30, scale = 2):
         cX = width // 2
         cY = height // 2
@@ -75,7 +75,7 @@ class App(object):
             self.missiles[i].draw_connection(self.h, (255, 255, 0), self.mprime[i])
             self.mprime[i].draw_missile(self.h, (128, 128, 0))
             self.missiles[i].draw_missile(self.h, (255, 255, 0))
-        
+
         pygame.display.flip()
 
     def update_step(self):
@@ -104,11 +104,11 @@ class App(object):
     def loop(self):
         pygame.event.set_allowed(None)
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
-    
+
         loop = True
         while loop:
             self.draw()
-            
+
             e = pygame.event.wait()
 
             if e.type == pygame.KEYDOWN:
@@ -167,10 +167,10 @@ class App(object):
                     self.h.set_bottom_text("Notice", "G limit exceeded!")
                 except IllegalCommand:
                     self.h.set_bottom_text("Notice", "Illegal command for this fighter!")
-                    
+
             elif e.type == pygame.QUIT:
                 loop = False
-            
+
 if __name__ == "__main__":
     try:
         a = App()

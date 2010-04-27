@@ -34,10 +34,10 @@ class Missile(Entity):
         elif len(components) == 1:
 ##            print "1 comps"
             direction, distance = components[0]
-            
+
             used_thrust = abs(direction - self.orientation)
             self.orientation = direction
-            
+
             while used_thrust < self.max_thrust and distance > 0:
                 self.thrust(self.orientation)
                 used_thrust += 1
@@ -58,7 +58,7 @@ class Missile(Entity):
 ##            else:
 ##                s = "L"*used_thrust
             self.orientation = components[0][0]
-            
+
             while used_thrust < self.max_thrust and (components[0][1] or
                                                      components[1][1]):
                 if components[0][1] < components[1][1]:
@@ -119,11 +119,10 @@ class Missile(Entity):
                 turns0 = abs(components[0][0] - self.orientation)
                 turns1 = abs(components[1][0] - self.orientation)
 
-                
                 if max(turns0, turns1)+(components[0][1] +
                                         components[1][1]) > self.max_thrust:
                     continue
-                
+
                 for i in range(components[0][1]):
                     self.thrust(components[0][0])
                 for i in range(components[1][1]):
