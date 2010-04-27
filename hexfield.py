@@ -90,12 +90,12 @@ class HexField(object):
                 pass
 
     def origin_coords(self):
-        return Vec(self.origin[0] * 21 + 14,
-                   self.origin[1] * 12 + 12) * self.scale
+        return Vec(self.origin.x * 21 + 14,
+                   self.origin.y * 12 + 12) * self.scale
 
     def display_coords(self, vecs):
         if isinstance(vecs, Vec):
-            return Vec(vecs[0] * 21, vecs[1] * 12) * self.scale
+            return Vec(vecs.x * 21, vecs.y * 12) * self.scale
         elif isinstance(vecs, HexVec):
             return display_coords(Vec(vecs))
         else:
