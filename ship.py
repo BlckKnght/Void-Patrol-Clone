@@ -10,6 +10,7 @@ import pygame.draw
 
 from entity import Entity
 from shiperror import *
+from vpmath import Vec
 
 class ThrustSpec(object):
     def __init__(self, max_thrust, max_g, thrusters, spin_cost):
@@ -100,6 +101,8 @@ class Ship(Entity):
 
     def draw_ship(self, hexfield, color):
         center, front, left, right = self.display_vecs(hexfield)
+        print front, left, right
+        print Vec(self.orientation)
         l = [center + front * 1/3,
              center + (front + right) * (-1/6),
              center + (front + left) * (-1/6)]
@@ -109,7 +112,7 @@ class Ship(Entity):
         if visited == None:
             visited = {}
 
-        state = (self.pos[0], self.pos[1], self.orientation)
+        state = (self.pos, self.orientation)
         if visited.has_key(state):
             if visited[state] <= self.used_thrust:
                 return

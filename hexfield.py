@@ -7,7 +7,7 @@ import pygame.display
 import pygame.draw
 import pygame.font
 
-from vpmath import Vec, HexVec
+from vpmath import Vec, HexVec, Direction
 
 class HexField(object):
     def __init__(self, width, height, origin = None, scale = 2):
@@ -97,7 +97,9 @@ class HexField(object):
         if isinstance(vecs, Vec):
             return Vec(vecs.x * 21, vecs.y * 12) * self.scale
         elif isinstance(vecs, HexVec):
-            return display_coords(Vec(vecs))
+            return self.display_coords(Vec(vecs))
+        elif isinstance(vecs, Direction):
+            return self.display_coords(Vec(vecs))
         else:
             return [self.display_coords(v) for v in vecs]
 

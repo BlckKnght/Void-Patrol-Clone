@@ -47,6 +47,7 @@ class Entity(object):
                                          self.orientation - 1,
                                          self.orientation + 1))
         center += hexfield.origin_coords()
+
         return center, front, left, right
 
     def draw_front_arc(self, hexfield, color):

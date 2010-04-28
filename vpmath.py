@@ -2,99 +2,169 @@
 
 from __future__ import division
 
-# arbitrary dimensional vector
-class Vec(object):
-    def __init__(self, *value):
-        if len(value) > 1:
-            self.value = value
+# 6-way direction, has exactly six instances.
+class Direction(object):
+    _instances = [None] * 6
+
+    def __new__(cls, value):
+        value %= 6
+        if cls._instances[value] is None:
+            cls._instances[value] = object.__new__(cls)
+            cls._instances[value].value = value
+
+        return cls._instances[value]
+
+    def __getnewargs__(self):
+        return (self.value,)
+
+    def __add__(self, amount):
+        """Return the direction rotated clockwise by amount."""
+        return Direction(self.value + amount)
+
+    def __sub__(self, rhs):
+        """Do subtraction. This can have two different meanings.
+
+        If 'rhs' is another direction, return the turns needed to go from
+        'self' to 'rhs'.
+
+        If 'rhs' is an integer, return this direction rotated counter-
+        clockwise by that amount."""
+        if isinstance(rhs, Direction):
+            return (self.value - rhs.value + 2) % 6 - 2
         else:
-            self.value = value[0]
+            return Direction(self.value - rhs)
 
-    def __eq__(self, other):
-        return self.value == other.value
-
-    def __ne__(self, other):
-        return self.value != other.value
-
-    def __add__(self, other):
-        return Vec(*tuple(i + j for i, j in zip(self.value, other.value)))
-
-    def __sub__(self, other):
-        return Vec(*tuple(i - j for i, j in zip(self.value, other.value)))
-
-    def __mul__(self, other):
-        return Vec(*tuple(i * other for i in self.value))
-
-    def __rmul__(self, other):
-        return Vec(*tuple(other * i for i in self.value))
-
-    def __truediv__(self, other):
-        return Vec(*tuple(i / other for i in self.value))
-
-    __div__ = __truediv__
-
-    def __getitem__(self, index):
-        return self.value[index]
-
-    def __setitem__(self, index, value):
-        self.value[index] = value
-
-    def __len__(self):
-        return len(self.value)
+    def __neg__(self):
+        """Return the opposite direction."""
+        return Direction(self.value + 3)
 
     def __repr__(self):
-        return "Vec(%s)" % repr(self.value)
+        return "Direction(%d)" % self.value
 
+    _direction_names = ["North", "Northeast", "Southeast",
+                        "South", "Southwest", "Northwest"]
     def __str__(self):
-        return str(self.value)
-
-    def __itr__(self):
-        return itr(self.value)
-
-    def __abs__(self):
-        return math.sqrt(sum(x*x for x in self.value))
+        return self._direction_names[self.value]
 
     def __hash__(self):
         return hash(self.value)
 
 
+# arbitrary dimensional vector
+class Vec(object):
+    _unit_vectors = [(0, -2),
+                     (1, -1),
+                     (1, 1),
+                     (0, 2),
+                     (-1, 1),
+                     (-1, -1)]
+
+    def __init__(self, x=0, y=0):
+        if isinstance(x, (int, float)):
+            self.x = x
+            self.y = y
+        elif isinstance(x, Vec):
+            self.x = x.x
+            self.y = x.y
+        elif isinstance(x, (tuple, list)):
+            self.x, self.y = x
+        elif isinstance(x, HexVec):
+            self.x = x.a
+            self.y = x.b - x.c
+        elif isinstance(x, Direction):
+            self.x, self.y = self._unit_vectors[x.value]
+        else:
+            raise TypeError("Can't build a Vec from arguments: %s" %
+                            repr((x, y)))
+
+    def __eq__(self, other):
+        if not isinstance(other, Vec):
+            other = Vec(other)
+
+        return self.x == other.x and self.y == other.y
+
+    def __ne__(self, other):
+        if not isinstance(other, Vec):
+            other = Vec(other)
+
+        return self.x != other.x or self.y != other.y
+
+    def __add__(self, other):
+        if not isinstance(other, Vec):
+            other = Vec(other)
+
+        return Vec(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        if not isinstance(other, Vec):
+            other = Vec(other)
+
+        return Vec(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, scalar):
+        return Vec(self.x + scalar, self.y + scalar)
+
+    __rmul__ = __mul__
+
+    def __truediv__(self, scalar):
+        return Vec(self.x / scalar, self.y / scalar)
+
+    __div__ = __truediv__
+
+    def __getitem__(self, index):
+        return [self.x, self.y][index]
+
+    def __len__(self):
+        return 2
+
+    def __repr__(self):
+        return "Vec(%s, %s)" % (self.x, self.y)
+
+    def __str__(self):
+        return str((self.x, self.y))
+
+    def __itr__(self):
+        yield x
+        yield y
+
+    def __abs__(self):
+        return math.sqrt(x*x + y*y)
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
 class HexVec(object):
+    _unit_hexvecs = [(0, -1),
+                     (1, -1),
+                     (1, 0),
+                     (0, 1),
+                     (-1, 1),
+                     (-1, 0)]
+
     def __init__(self, a=None, b=None, c=None):
         if a is None and b is None and c is None:
-            a = 0
-            b = 0
+            self.a = 0
+            self.b = 0
         elif a is None:
-            a = -(b+c)
-        elif b is None:
-            b = -(a+c)
-
-        self.a = a
-        self.b = b
+            self.a = -(b+c)
+            self.b = b
+        elif isinstance(a, (int, float)):
+            if b is None:
+                b = -(a+c)
+            self.a = a
+            self.b = b
+        elif isinstance(a, Vec):
+            self.a = a.x
+            self.b = type(a.x)((a.y - a.x) / 2)
+        elif isinstance(a, Direction):
+            self.a, self.b = self._unit_hexvecs[a.value]
+        else:
+            raise TypeError("Can't build a HexVec from arguments: %s" %
+                            (repr((a, b, c))))
 
     @property
     def c(self):
         return -(self.a + self.b)
-
-    def vector(self):
-        #return Vec(self.a, self.b - self.c)
-        return Vec(self.a, 2*self.b + self.a)
-
-    @staticmethod
-    def from_vector(vec):
-        a = vec[0]
-        #   y = b-c
-        #   b = y+c
-        #   b = y-(a+b)
-        # 2*b = y-a
-        #   b = (y-a)/2
-        b = (vec[1]-a)/2
-
-        ib = int(b)
-
-        if b == ib:
-            b = ib
-
-        return HexVec(a, b)
 
     def __add__(self, other):
         return HexVec(self.a + other.a,
@@ -148,39 +218,23 @@ class HexVec(object):
         #print aa, ab, ac
 
         if aa >= ab and aa >= ac:
-            if self.a > 0:
-                #print "a+"
-                components = [[Direction(1), ab],
-                              [Direction(2), ac]]
-            else:
-                #print "a-"
-                components = [[Direction(4), ab],
-                              [Direction(5), ac]]
+            components = [[Direction(1), -self.b],
+                          [Direction(2), -self.c]]
         elif ab >= aa and ab >= ac:
-            if self.b > 0:
-                #print "b+"
-                components = [[Direction(3), ac],
-                              [Direction(4), aa]]
-            else:
-                #print "b-"
-                components = [[Direction(0), ac],
-                              [Direction(1), aa]]
-        else:
-            if self.c > 0:
-                #print "c+"
-                components = [[Direction(5), aa],
-                              [Direction(0), ab]]
-            else:
-                #print "c-"
-                components = [[Direction(2), aa],
-                              [Direction(3), ab]]
+            components = [[Direction(3), -self.c],
+                          [Direction(4), -self.a]]
+        else: # ac is largest
+            components = [[Direction(5), -self.a],
+                          [Direction(0), -self.b]]
 
-        #print components
+        if components[0][1] < 0:
+            components[0] = [v for v in components[0]]
+
+        if components[1][1] < 0:
+            components[1] = [v for v in components[1]]
 
         if components[0][1] < components[1][1]:
             components.reverse()
-
-        #print components
 
         if components[1][1] == 0:
             del components[1]
@@ -211,66 +265,3 @@ class HexVec(object):
                 pass
 
         return HexVec(ia, ib)
-
-
-# 6-way direction, has exactly six instances.
-class Direction(object):
-    _instances = [None] * 6
-
-    def __new__(cls, val):
-        val %= 6
-        if cls._instances[val] is None:
-            cls._instances[val] = object.__new__(cls)
-            cls._instances[val].val = val
-
-        return cls._instances[val]
-
-    def __getnewargs__(self):
-        return (self.val,)
-
-    def inc(self):
-        return Direction(self.val + 1)
-
-    def dec(self):
-        return Direction(self.val - 1)
-
-    def __add__(self, amount):
-        return Direction(self.val + amount)
-
-    def __sub__(self, rhs):
-        if isinstance(rhs, Direction):
-            return (self.val - rhs.val + 2) % 6 - 2
-        else:
-            return Direction(self.val - amount)
-
-    def __neg__(self):
-        return Direction(self.val + 3)
-
-    _unit_vectors = [Vec(0, -2),
-                     Vec(1, -1),
-                     Vec(1, 1),
-                     Vec(0, 2),
-                     Vec(-1, 1),
-                     Vec(-1, -1)]
-    def vector(self):
-        return self._unit_vectors[self.val]
-
-    _unit_hexvecs = [HexVec(0, -1),
-                     HexVec(1, -1),
-                     HexVec(1, 0),
-                     HexVec(0, 1),
-                     HexVec(-1, 1),
-                     HexVec(-1, 0)]
-    def hex_vector(self):
-        return self._unit_hexvecs[self.val]
-
-    def __repr__(self):
-        return "Direction(%d)" % self.val
-
-    _direction_names = ["North", "Northeast", "Southeast",
-                        "South", "Southwest", "Northwest"]
-    def __str__(self):
-        return self._direction_names[self.val]
-
-    def __hash__(self):
-        return hash(self.val)
