@@ -101,8 +101,6 @@ class Ship(Entity):
 
     def draw_ship(self, hexfield, color):
         center, front, left, right = self.display_vecs(hexfield)
-        print front, left, right
-        print Vec(self.orientation)
         l = [center + front * 1/3,
              center + (front + right) * (-1/6),
              center + (front + left) * (-1/6)]

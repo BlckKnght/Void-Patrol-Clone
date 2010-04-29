@@ -102,7 +102,7 @@ class Vec(object):
         return Vec(self.x - other.x, self.y - other.y)
 
     def __mul__(self, scalar):
-        return Vec(self.x + scalar, self.y + scalar)
+        return Vec(self.x * scalar, self.y * scalar)
 
     __rmul__ = __mul__
 
