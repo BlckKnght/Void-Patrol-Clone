@@ -1,0 +1,103 @@
+Void Patrol Clone
+
+This is a project to replicate some of the elements of the game
+Space Wing: Void Patrol from takeAplay.net (http://www.takaplay.net)
+in as tand alone program. The program can be used to learn better
+piloting skills and to test out possible game improvements.
+
+This Project is Copyright 2008-2010 Steven Barker (BlckKnght@gmail.com).
+
+It is inspired by Space Wing: Void Patrol which is Copyright
+takAplay.net (webmaster@takeaplay.net), but no code or art from that
+game has been used.
+
+
+Dependencies
+
+This project is written in Python. To run it you will need a copy
+of the Python interpreter which can be downloaded for most operating
+systems from the Python website (http://www.python.org/download).
+Currently a 2.x version of Python is required, but support for 3.x
+versions is planned for the near future.
+
+The game also requires a version of the Pygame library that is
+compatible with your version of Python. Pygame can be downloaded
+from the Pygame website (http://pygame.org/download.shtml).
+
+
+How to Play
+
+Run the program by executing the file "vp.py".  You'll see a hex grid
+displayed on the screen, with your ship located in the center (shown by
+a triangle).  All of the locations you can move to will have one or more
+angled lines drawn on them, showing the possible facings your ship can
+reach. When you ship has gained some speed, you'll also see the potential
+locations you'll be able to go to on the following turn (in a lighter color).
+
+Your ship can be controlled by pressing keys on the keyboard using either of
+two systems:
+
+First, the keyboard shortcuts used on the regular Void Patrol site will work:
+
+	U			I			O
+(thrust forwards+left)	(boost forward)		(thrust forwards+right)
+
+	J			K			L
+(turn left)		(thrust forwards)	(turn right)
+
+	X						Enter
+(cancel orders)					(advance to next turn)
+
+
+Alternatively, a similar scheme using the keyboard number pad can be used
+(but notice that the keys for boosts and forwards thrusts are swapped).
+
+	NP7			NP8			NP9
+(thrust forwards+left)	(thrust forward)	(thrust forwards+right)
+
+	NP4			NP5			NP6
+(turn left)		(boost forwards)	(turn right)
+
+	NP0						NPEnter
+(cancel orders)					(advance to next turn)
+
+
+Several of the function keys on the keyboard can be used to trigger
+special functions:
+
+F1 - Switch to a Badger-like fighter with maneuvering code 4S1(3)
+F2 - Switch to a Javelin-like fighter with maneuvering code 6S2(4)
+F3 - Switch to a Sparrowhawk-like fighter with maneuvering code 4D1(3)
+F4 - Switch to a Lone Wolf-like fighter with maneuvering code 5D2(4)
+
+F5 - Launch a 5 thrust "smart" missile
+F6 - Launch a 6 thrust "smart" missile
+
+All of the fighter switching commands will move the ship back to the
+starting position at the center of the screen. Missiles will also appear
+there, and will seek on the player's ship until they hit it.
+
+Missiles will be drawn with their starting and ending velocities shown by
+extra lines on the hex map, as this makes it easier to see how they are
+attempting an intercept.
+
+
+To Do
+
+This program is a work in progress. Feedback is appreciated!
+
+Here are some of the things planned for improving the game:
+
+Allow both berserk and "smart" missiles to be launched at the same time
+(currently the choice of which type is hard coded).
+
+Make it possible to move the viewport so that the fighter and missiles
+are always on the screen.
+
+Clean up the simulation code. It's really ugly.
+
+Move most of the python files into a package so the main directory
+is cleaner.
+
+Port to Python 3.x. Pygame recently released a 3.x version, but it may
+not be complete yet. See if we use anything that is missing (unlikely).
