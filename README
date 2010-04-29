@@ -2,12 +2,16 @@ Void Patrol Clone
 
 This is a project to replicate some of the elements of the game
 Space Wing: Void Patrol from takeAplay.net (http://www.takaplay.net)
-in as tand alone program. The program can be used to learn better
-piloting skills and to test out possible game improvements.
+in a stand alone program. The program can be used to learn better
+piloting skills and to test out game ideas, but at this time is is not
+a game that it is much fun to play.
 
 This Project is Copyright 2008-2010 Steven Barker (BlckKnght@gmail.com).
+It may be used, modified and/or redistributed under the terms of the MIT
+License, see the COPYRIGHT file or the following web site for details:
+http://www.opensource.org/licenses/mit-license.php
 
-It is inspired by Space Wing: Void Patrol which is Copyright
+The project was inspired by Space Wing: Void Patrol which is Copyright
 takAplay.net (webmaster@takeaplay.net), but no code or art from that
 game has been used.
 
