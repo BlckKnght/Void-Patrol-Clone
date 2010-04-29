@@ -78,11 +78,11 @@ class Ship(Entity):
         elif c == 7:
             if self.thrust_spec.thrusters != 2:
                 raise IllegalCommand()
-            self.thrust(self.orientation.dec())
+            self.thrust(self.orientation - 1)
         elif c == 9:
             if self.thrust_spec.thrusters != 2:
                 raise IllegalCommand()
-            self.thrust(self.orientation.inc())
+            self.thrust(self.orientation + 1)
         elif c == 4:
             self.rotate(-1)
         elif c == 6:

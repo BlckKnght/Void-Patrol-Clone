@@ -90,8 +90,8 @@ class Missile(Entity):
             seek_hv = pos_hv + vel_hv * lookahead
             scaled_hv = seek_hv // (lookahead+1)**2
 
-            #if abs(seek_hv) > self.max_thrust:
-            #    continue
+            if abs(scaled_hv) > self.max_thrust:
+               continue
 
             components = scaled_hv.components()
 
