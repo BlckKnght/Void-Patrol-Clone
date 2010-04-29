@@ -190,6 +190,12 @@ class HexVec(object):
     def __hash__(self):
         return hash((self.a, self.b))
 
+    def __eq__(self, other):
+        return self.a == other.a and self.b == other.b
+
+    def __ne__(self, other):
+        return self.a != other.a or self.b != other.b
+
     def __str__(self):
         return str((self.a, self.b, self.c))
 
@@ -228,10 +234,10 @@ class HexVec(object):
                           [Direction(0), -self.b]]
 
         if components[0][1] < 0:
-            components[0] = [v for v in components[0]]
+            components[0] = [-v for v in components[0]]
 
         if components[1][1] < 0:
-            components[1] = [v for v in components[1]]
+            components[1] = [-v for v in components[1]]
 
         if components[0][1] < components[1][1]:
             components.reverse()
