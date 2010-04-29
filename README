@@ -40,7 +40,7 @@ of two systems:
 First, the keyboard shortcuts used on the regular Void Patrol site will work:
 
          U                     I                     O
-(thrust forwards+left)   (boost forward)    (thrust forwards+right)
+(thrust forwards+left)   (boost forwards)   (thrust forwards+right)
 
          J                     K                     L
    (turn left)          (thrust forwards)      (turn right)
@@ -53,10 +53,10 @@ Alternatively, a similar scheme using the keyboard number pad can be used
 (but notice that the keys for boosts and forwards thrusts are swapped).
 
         NP7                   NP8                   NP9
-(thrust forwards+left)   (boost forward)    (thrust forwards+right)
+(thrust forwards+left)  (thrust forwards)   (thrust forwards+right)
 
         NP4                   NP5                   NP6
-   (turn left)          (thrust forwards)      (turn right)
+   (turn left)           (boost forwards)      (turn right)
 
         NP0                                       NPEnter
  (cancel orders)                            (advance to next turn)
