@@ -34,32 +34,32 @@ angled lines drawn on them, showing the possible facings your ship can
 reach. When you ship has gained some speed, you'll also see the potential
 locations you'll be able to go to on the following turn (in a lighter color).
 
-Your ship can be controlled by pressing keys on the keyboard using either of
-two systems:
+Your ship can be controlled by pressing keys on the keyboard using either
+of two systems:
 
 First, the keyboard shortcuts used on the regular Void Patrol site will work:
 
-	U			I			O
-(thrust forwards+left)	(boost forward)		(thrust forwards+right)
+         U                     I                     O
+(thrust forwards+left)   (boost forward)    (thrust forwards+right)
 
-	J			K			L
-(turn left)		(thrust forwards)	(turn right)
+         J                     K                     L
+   (turn left)          (thrust forwards)      (turn right)
 
-	X						Enter
-(cancel orders)					(advance to next turn)
+         X                                         Enter
+ (cancel orders)                            (advance to next turn)
 
 
 Alternatively, a similar scheme using the keyboard number pad can be used
 (but notice that the keys for boosts and forwards thrusts are swapped).
 
-	NP7			NP8			NP9
-(thrust forwards+left)	(thrust forward)	(thrust forwards+right)
+        NP7                   NP8                   NP9
+(thrust forwards+left)   (boost forward)    (thrust forwards+right)
 
-	NP4			NP5			NP6
-(turn left)		(boost forwards)	(turn right)
+        NP4                   NP5                   NP6
+   (turn left)          (thrust forwards)      (turn right)
 
-	NP0						NPEnter
-(cancel orders)					(advance to next turn)
+        NP0                                       NPEnter
+ (cancel orders)                            (advance to next turn)
 
 
 Several of the function keys on the keyboard can be used to trigger
