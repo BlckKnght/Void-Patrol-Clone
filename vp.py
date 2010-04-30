@@ -52,10 +52,10 @@ class App(object):
         self.missiles = []
         self.missile_number = 0
 
-    def add_missile(self, thrust):
+    def add_missile(self, thrust, seek_algorithm):
         m = Missile("Missile %d" % self.missile_number,
                     HexVec(Vec(0, 0)), HexVec(Vec(0, 0)),
-                    Direction(0), thrust)
+                    Direction(0), thrust, seek_algorithm)
 
         self.missiles.append(m)
 
@@ -86,7 +86,7 @@ class App(object):
         self.mprime = [copy.deepcopy(m) for m in self.missiles]
         for mp in self.mprime:
             mp.update()
-            mp.smart_seek(self.sprime)
+            mp.seek(self.sprime)
 
         self.h.set_top_text("Energy", "Energy: %d" %
                                 (self.sprime.thrust_spec.max_thrust -
@@ -154,10 +154,22 @@ class App(object):
                         self.setup_ship("Lone Wolf", self.lone_wolf_spec)
                         self.update()
                     elif e.key == K_F5:
-                        self.add_missile(5)
+                        self.add_missile(5, 1)
                         self.update_step()
                     elif e.key == K_F6:
-                        self.add_missile(6)
+                        self.add_missile(6, 1)
+                        self.update_step()
+                    elif e.key == K_F7:
+                        self.add_missile(7, 1)
+                        self.update_step()
+                    elif e.key == K_F8:
+                        self.add_missile(8, 1)
+                        self.update_step()
+                    elif e.key == K_F9:
+                        self.add_missile(7, 0)
+                        self.update_step()
+                    elif e.key == K_F10:
+                        self.add_missile(9, 0)
                         self.update_step()
                     elif e.key == K_q or e.key == K_ESCAPE:
                         loop = False

@@ -13,10 +13,12 @@ from entity import Entity
 from vpmath import HexVec
 
 class Missile(Entity):
-    def __init__(self, id, pos, vel, orientation, max_thrust):
+    def __init__(self, id, pos, vel, orientation, max_thrust,
+                 seek_algorithm=0):
         super(Missile, self).__init__(id, pos, vel, orientation)
 
         self.max_thrust = max_thrust
+        self.seek_algorithm = seek_algorithm
 
     def berserk_seek(self, target):
         target_hexvec = target.pos - self.pos
@@ -129,6 +131,11 @@ class Missile(Entity):
                     self.orientation = components[1][0]
 
                 return
+    _algorithms = [berserk_seek,
+                   smart_seek]
+    def seek(self, target):
+        return self._algorithms[self.seek_algorithm](self, target)
+
 
     def draw_missile(self, hexfield, color):
         center, front, left, right = self.display_vecs(hexfield)

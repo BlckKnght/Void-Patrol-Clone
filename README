@@ -47,10 +47,10 @@ First, the keyboard shortcuts used on the regular Void Patrol site will work:
 (thrust forwards+left)   (boost forwards)   (thrust forwards+right)
 
          J                     K                     L
-   (turn left)          (thrust forwards)      (turn right)
+    (turn left)         (thrust forwards)      (turn right)
 
-         X                                         Enter
- (cancel orders)                            (advance to next turn)
+         X                  Q or ESC               Enter
+  (cancel orders)       (quit the program)   (advance to next turn)
 
 
 Alternatively, a similar scheme using the keyboard number pad can be used
@@ -60,10 +60,10 @@ Alternatively, a similar scheme using the keyboard number pad can be used
 (thrust forwards+left)  (thrust forwards)   (thrust forwards+right)
 
         NP4                   NP5                   NP6
-   (turn left)           (boost forwards)      (turn right)
+    (turn left)          (boost forwards)      (turn right)
 
-        NP0                                       NPEnter
- (cancel orders)                            (advance to next turn)
+        NP0                 Q or ESC              KPEnter
+  (cancel orders)       (quit the program)   (advance to next turn)
 
 
 Several of the function keys on the keyboard can be used to trigger
@@ -76,6 +76,11 @@ F4 - Switch to a Lone Wolf-like fighter with maneuvering code 5D2(4)
 
 F5 - Launch a 5 thrust "smart" missile
 F6 - Launch a 6 thrust "smart" missile
+F7 - Launch a 7 thrust "smart" missile
+F8 - Launch a 8 thrust "smart" missile
+
+F9  - Launch a 7 thrust "berserk" missile
+F10 - Launch a 9 thrust "berserk" missile
 
 All of the fighter switching commands will move the ship back to the
 starting position at the center of the screen. Missiles will also appear
@@ -92,8 +97,8 @@ This program is a work in progress. Feedback is appreciated!
 
 Here are some of the things planned for improving the game:
 
-Allow both berserk and "smart" missiles to be launched at the same time
-(currently the choice of which type is hard coded).
+Give on screen info about the missiles that are active (thrust and
+seek algorithm, at a minimum).
 
 Make it possible to move the viewport so that the fighter and missiles
 are always on the screen.
