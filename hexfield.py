@@ -34,6 +34,22 @@ class HexField(object):
         pygame.display.set_mode(((self.width * 21 + 7) * self.scale,
                                  (self.height * 12 + 12) * self.scale))
 
+    def center(self, focuses):
+        weighted_position = HexVec()
+        total_weight = 0
+        for (position, weight) in focuses:
+            weighted_position += position * weight
+            total_weight += weight
+
+        weight_center = Vec(weighted_position // total_weight)
+        screen_center = Vec(self.width // 2, self.height // 2)
+
+        center = screen_center - weight_center
+        if (center.x + center.y) % 2 == 1:
+            center.y += 1
+
+        self.origin = center
+
     def draw_hex_tile(self, x, y):
         xunit = 21 * self.scale
         yunit = 12 * self.scale

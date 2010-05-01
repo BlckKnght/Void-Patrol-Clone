@@ -52,6 +52,14 @@ class App(object):
         self.missiles = []
         self.missile_number = 0
 
+    def recenter(self):
+        focuses = [(self.s.pos, 2),
+                   (self.sprime.pos, 4),
+                   (self.sprimeprime.pos, 2)]
+        focuses.extend((m.pos, 1) for m in self.missiles)
+        focuses.extend((mp.pos, 2) for mp in self.mprime)
+        self.h.center(focuses)
+
     def add_missile(self, thrust, seek_algorithm):
         m = Missile("Missile %d" % self.missile_number,
                     HexVec(Vec(0, 0)), HexVec(Vec(0, 0)),
@@ -103,6 +111,7 @@ class App(object):
         self.sprime = copy.deepcopy(self.s)
         self.sprime.update()
         self.update_step()
+        #self.recenter()
 
     def loop(self):
         pygame.event.set_allowed(None)
@@ -171,6 +180,8 @@ class App(object):
                     elif e.key == K_F10:
                         self.add_missile(9, 0)
                         self.update_step()
+                    elif e.key == K_F12:
+                        self.recenter()
                     elif e.key == K_q or e.key == K_ESCAPE:
                         loop = False
                     else:

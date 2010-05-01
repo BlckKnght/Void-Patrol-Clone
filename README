@@ -82,6 +82,8 @@ F8 - Launch a 8 thrust "smart" missile
 F9  - Launch a 7 thrust "berserk" missile
 F10 - Launch a 9 thrust "berserk" missile
 
+F12 - Recenter the display near to the fighter and missiles
+
 All of the fighter switching commands will move the ship back to the
 starting position at the center of the screen. Missiles will also appear
 there, and will seek on the player's ship until they hit it.
@@ -101,7 +103,7 @@ Give on screen info about the missiles that are active (thrust and
 seek algorithm, at a minimum).
 
 Make it possible to move the viewport so that the fighter and missiles
-are always on the screen.
+are always on the screen. - Partially done!
 
 Clean up the simulation code. It's really ugly.
 
