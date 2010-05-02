@@ -20,12 +20,15 @@ class ThrustSpec(object):
         self.spin_cost = spin_cost
 
     def __repr__(self):
-        return "ThrustSpec(%d, %d, %d, %d)" % (self.max_thrust, self.max_g,
-                                               self.thrusters, self.spin_cost)
+        return "ThrustSpec({0}, {1}, {2}, {3})".format(self.max_thrust,
+                                                       self.max_g,
+                                                       self.thrusters,
+                                                       self.spin_cost)
 
     def __str__(self):
-        return "%d%s%d(%d)" % (self.max_thrust, [None, "S", "D"][self.thrusters],
-                               self.spin_cost, self.max_g)
+        return "{0}{1}{2}({3})".format(self.max_thrust,
+                                       [None, "S", "D"][self.thrusters],
+                                       self.spin_cost, self.max_g)
 
 class Ship(Entity):
     def __init__(self, id, pos, vel, orientation,
@@ -91,13 +94,13 @@ class Ship(Entity):
             raise ValueError()
 
     def __repr__(self):
-        return "%s(%s, %s, %s, %s, %s, %d)" % (self.__class__.__name__,
-                                               repr(self.id),
-                                               repr(self.pos),
-                                               repr(self.vel),
-                                               repr(self.orientation),
-                                               repr(self.thrust_spec),
-                                               self.used_thrust)
+        return "{0}({1}, {2}, {3}, {4}, {5}, {6})".format(self.__class__.__name__,
+                                                          repr(self.id),
+                                                          repr(self.pos),
+                                                          repr(self.vel),
+                                                          repr(self.orientation),
+                                                          repr(self.thrust_spec),
+                                                          self.used_thrust)
 
     def draw_ship(self, hexfield, color):
         center, front, left, right = self.display_vecs(hexfield)
@@ -111,7 +114,7 @@ class Ship(Entity):
             visited = {}
 
         state = (self.pos, self.orientation)
-        if visited.has_key(state):
+        if state in visited:
             if visited[state] <= self.used_thrust:
                 return
         else:

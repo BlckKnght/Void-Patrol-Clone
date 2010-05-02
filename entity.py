@@ -35,10 +35,10 @@ class Entity(object):
         self.pos += self.vel
 
     def __repr__(self):
-        return "Entity(%s, %s, %s, %s)" % (repr(self.id),
-                                           repr(self.pos),
-                                           repr(self.vel),
-                                           repr(self.orientation))
+        return "Entity({0}, {1}, {2}, {3})".format(repr(self.id),
+                                                   repr(self.pos),
+                                                   repr(self.vel),
+                                                   repr(self.orientation))
 
     def display_vecs(self, hexfield):
         center, front, left, right = \

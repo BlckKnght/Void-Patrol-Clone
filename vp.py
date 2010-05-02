@@ -61,7 +61,7 @@ class App(object):
         self.h.center(focuses)
 
     def add_missile(self, thrust, seek_algorithm):
-        m = Missile("Missile %d" % self.missile_number,
+        m = Missile("Missile {0}".format(self.missile_number),
                     HexVec(Vec(0, 0)), HexVec(Vec(0, 0)),
                     Direction(0), thrust, seek_algorithm)
 
@@ -96,14 +96,14 @@ class App(object):
             mp.update()
             mp.seek(self.sprime)
 
-        self.h.set_top_text("Energy", "Energy: %d" %
-                                (self.sprime.thrust_spec.max_thrust -
-                                 self.sprime.used_thrust))
-        self.h.set_top_text("Gs", "G load: %d" % self.sprime.used_g)
-        self.h.set_bottom_text("Position", "Position: %s" % self.sprime.pos)
-        self.h.set_bottom_text("Velocity", "Speed: %d (%s)" %
-                                   (abs(self.sprime.vel),
-                                    " + ".join("%dx%s" % tuple(reversed(c))
+        self.h.set_top_text("Energy",
+                            "Energy: {0}".format(self.sprime.thrust_spec.max_thrust -
+                                                 self.sprime.used_thrust))
+        self.h.set_top_text("Gs", "G load: {0}".format(self.sprime.used_g))
+        self.h.set_bottom_text("Position",
+                               "Position: {0}".format(self.sprime.pos))
+        self.h.set_bottom_text("Velocity", "Speed: {0} ({1})".format(abs(self.sprime.vel),
+                                    " + ".join("{0[1]}x{0[0]}".format(c)
                                                for c in self.sprime.vel.components())))
         self.h.set_bottom_text("Notice", None)
 
@@ -185,7 +185,7 @@ class App(object):
                     elif e.key == K_q or e.key == K_ESCAPE:
                         loop = False
                     else:
-                        print "I don't recognize key: %s" % str(e.key)
+                        print("I don't recognize key: {0}".format(str(e.key)))
 
                 except ThrustLimit:
                     self.h.set_bottom_text("Notice", "Thrust limit exceeded!")

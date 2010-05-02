@@ -21,8 +21,6 @@ Dependencies
 This project is written in Python. To run it you will need a copy
 of the Python interpreter which can be downloaded for most operating
 systems from the Python website (http://www.python.org/download).
-Currently a 2.x version of Python is required, but support for 3.x
-versions is planned for the near future.
 
 The game also requires a version of the Pygame library that is
 compatible with your version of Python. Pygame can be downloaded
@@ -109,6 +107,3 @@ Clean up the simulation code. It's really ugly.
 
 Move most of the python files into a package so the main directory
 is cleaner.
-
-Port to Python 3.x. Pygame recently released a 3.x version, but it may
-not be complete yet. See if we use anything that is missing (unlikely).

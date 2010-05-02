@@ -39,7 +39,7 @@ class Direction(object):
         return Direction(self.value + 3)
 
     def __repr__(self):
-        return "Direction(%d)" % self.value
+        return "Direction({0})".format(self.value)
 
     _direction_names = ["North", "Northeast", "Southeast",
                         "South", "Southwest", "Northwest"]
@@ -74,8 +74,8 @@ class Vec(object):
         elif isinstance(x, Direction):
             self.x, self.y = self._unit_vectors[x.value]
         else:
-            raise TypeError("Can't build a Vec from arguments: %s" %
-                            repr((x, y)))
+            raise TypeError("Can't build a Vec from arguments: {0}".format(
+                            repr((x, y))))
 
     def __eq__(self, other):
         if not isinstance(other, Vec):
@@ -118,7 +118,7 @@ class Vec(object):
         return 2
 
     def __repr__(self):
-        return "Vec(%s, %s)" % (self.x, self.y)
+        return "Vec({0}, {1})".format(self.x, self.y)
 
     def __str__(self):
         return str((self.x, self.y))
@@ -159,8 +159,8 @@ class HexVec(object):
         elif isinstance(a, Direction):
             self.a, self.b = self._unit_hexvecs[a.value]
         else:
-            raise TypeError("Can't build a HexVec from arguments: %s" %
-                            (repr((a, b, c))))
+            raise TypeError("Can't build a HexVec from arguments: {0}".format(
+                            repr((a, b, c))))
 
     @property
     def c(self):
