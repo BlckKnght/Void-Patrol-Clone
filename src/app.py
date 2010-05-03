@@ -40,8 +40,9 @@ class App(object):
             cY += 1
         self.h = HexField(width, height, Vec(cX, cY), scale)
         self.h.setup_window()
-        self.h.set_top_text_fields(["Ship Name", "Ship Maneuverability", "Energy", "Gs"])
-        self.h.set_bottom_text_fields(["Velocity", "Position", "Notice"])
+        self.h.set_top_text_fields(["Ship Name", "Ship Maneuverability", "Energy", "Gs",
+                                    "Velocity", "Position"])
+        self.h.set_bottom_text_fields(["Notice"])
         self.h.draw_field()
 
     def setup_ship(self, name = "Badger", thrust_spec = badger_spec):
@@ -67,7 +68,7 @@ class App(object):
         m = Missile("Missile {0}".format(self.missile_number),
                     HexVec(Vec(0, 0)), HexVec(Vec(0, 0)),
                     Direction(0), thrust, seek_algorithm)
-
+        self.missile_number += 1
         self.missiles.append(m)
 
     def draw(self):
@@ -97,15 +98,16 @@ class App(object):
         self.mprime = [copy.deepcopy(m) for m in self.missiles]
         for mp in self.mprime:
             mp.update()
-            mp.seek(self.sprime)
+            v = mp.seek(self.sprime)
+            self.h.set_bottom_text(mp.id, mp.display_text(v))
 
         self.h.set_top_text("Energy",
                             "Energy: {0}".format(self.sprime.thrust_spec.max_thrust -
                                                  self.sprime.used_thrust))
         self.h.set_top_text("Gs", "G load: {0}".format(self.sprime.used_g))
-        self.h.set_bottom_text("Position",
+        self.h.set_top_text("Position",
                                "Position: {0}".format(self.sprime.pos))
-        self.h.set_bottom_text("Velocity", "Speed: {0} ({1})".format(abs(self.sprime.vel),
+        self.h.set_top_text("Velocity", "Speed: {0} ({1})".format(abs(self.sprime.vel),
                                     " + ".join("{0[1]}x{0[0]}".format(c)
                                                for c in self.sprime.vel.components())))
         self.h.set_bottom_text("Notice", None)
@@ -149,6 +151,12 @@ class App(object):
                     elif e.key == K_RETURN or e.key == K_KP_ENTER:
                         self.s = self.sprime
 ##                        print [m.pos - self.s.pos for m in self.mprime]
+                        self.missiles = []
+                        for mp in self.mprime:
+                            if mp.pos == self.s.pos:
+                                self.h.set_bottom_text(m.id, None)
+                            else:
+                                self.missiles.append(mp)
                         self.missiles = [m for m in self.mprime if m.pos != self.s.pos]
                         self.update()
                     elif e.key == K_x or e.key == K_KP0:

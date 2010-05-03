@@ -22,6 +22,7 @@ class Missile(Entity):
 
     def berserk_seek(self, target):
         target_hexvec = target.pos - self.pos
+        target_range = abs(target_hexvec)
 
         components = target_hexvec.components()
 
@@ -80,10 +81,11 @@ class Missile(Entity):
 ##                s += "X"
 ##
 ##            print s
+        return target_range
 
     def smart_seek(self, target):
         if self.pos == target.pos:
-            return
+            return 0
 
         pos_hv = target.pos - self.pos
         vel_hv = target.vel - self.vel
@@ -100,7 +102,7 @@ class Missile(Entity):
             #print lookahead, seek_hv.components(), components
 
             if len(components) == 0:
-                return
+                return lookahead
             elif len(components) == 1:
                 turns = abs(components[0][0] - self.orientation)
                 if turns + components[0][1] > self.max_thrust:
@@ -110,7 +112,7 @@ class Missile(Entity):
                 for i in range(components[0][1]):
                     self.thrust(self.orientation)
 
-                return
+                return lookahead
 
             else: #len(components) == 2
                 turns0 = abs(components[0][0] - self.orientation)
@@ -130,12 +132,32 @@ class Missile(Entity):
                 else:
                     self.orientation = components[1][0]
 
-                return
+                return lookahead
+
     _algorithms = [berserk_seek,
                    smart_seek]
     def seek(self, target):
         return self._algorithms[self.seek_algorithm](self, target)
 
+    def display_text(self, value):
+        if self.seek_algorithm == 0:
+            if value == 0:
+                return "Berserk {0} ({1}) intercepting target.".format(self.id,
+                                                                       self.max_thrust)
+            else:
+                return ("Berserk {0} ({1}) locked on target. " +
+                        "{2} hexes to go for intercept.").format(self.id,
+                                                                 self.max_thrust,
+                                                                 value)
+        elif self.seek_algorithm == 1:
+            if value == 0:
+                return "Smart {0} ({1}) intercepting target.".format(self.id,
+                                                                     self.max_thrust)
+            else:
+                return ("Smart {0} ({1}) locked on target. " +
+                        "{2} turns until intercept.").format(self.id,
+                                                             self.max_thrust,
+                                                             value)
 
     def draw_missile(self, hexfield, color):
         center, front, left, right = self.display_vecs(hexfield)

@@ -123,6 +123,9 @@ class HexField(object):
         self.top_text_fields = fields
 
     def set_top_text(self, field, new_text):
+        if field not in self.top_text_fields:
+            self.top_text_fields.append(field)
+
         if new_text is None:
             try:
                 del self.top_text[field]
@@ -146,6 +149,9 @@ class HexField(object):
         self.bottom_text_fields = fields
 
     def set_bottom_text(self, field, new_text):
+        if field not in self.bottom_text_fields:
+            self.bottom_text_fields.append(field)
+
         if new_text is None:
             try:
                 del self.bottom_text[field]
