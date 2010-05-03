@@ -30,6 +30,9 @@ class App(object):
     def __init__(self):
         pygame.init()
 
+    def quit(self):
+        pygame.quit()
+
     def setup_window(self, width = 20, height = 30, scale = 2):
         cX = width // 2
         cY = height // 2
@@ -196,14 +199,3 @@ class App(object):
 
             elif e.type == pygame.QUIT:
                 loop = False
-
-if __name__ == "__main__":
-    try:
-        a = App()
-        a.setup_window(50, 75, 1)
-        a.setup_ship()
-        a.setup_missiles()
-        a.update()
-        a.loop()
-    finally:
-        pygame.quit()
