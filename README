@@ -104,6 +104,3 @@ Make it possible to move the viewport so that the fighter and missiles
 are always on the screen. - Partially done!
 
 Clean up the simulation code. It's really ugly.
-
-Move most of the python files into a package so the main directory
-is cleaner.
