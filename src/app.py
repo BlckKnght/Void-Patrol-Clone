@@ -154,10 +154,9 @@ class App(object):
                         self.missiles = []
                         for mp in self.mprime:
                             if mp.pos == self.s.pos:
-                                self.h.set_bottom_text(m.id, None)
+                                self.h.set_bottom_text(mp.id, None)
                             else:
                                 self.missiles.append(mp)
-                        self.missiles = [m for m in self.mprime if m.pos != self.s.pos]
                         self.update()
                     elif e.key == K_x or e.key == K_KP0:
                         self.update()
