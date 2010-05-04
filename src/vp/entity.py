@@ -6,7 +6,7 @@ import pygame
 import pygame.display
 import pygame.draw
 
-from vpmath import HexVec
+from .vpmath import HexVec
 
 class Entity(object):
     def __init__(self, id, pos, vel, orientation):

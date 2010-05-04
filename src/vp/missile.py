@@ -9,8 +9,7 @@ import pygame
 import pygame.display
 import pygame.draw
 
-from entity import Entity
-from vpmath import HexVec
+from .entity import Entity
 
 class Missile(Entity):
     def __init__(self, id, pos, vel, orientation, max_thrust,

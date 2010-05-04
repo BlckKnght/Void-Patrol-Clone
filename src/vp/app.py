@@ -13,12 +13,12 @@ import pygame.font
 import pygame.time
 from pygame.locals import *
 
-from vpmath import Vec, Direction, HexVec
-from hexfield import HexField
-from entity import Entity
-from ship import ThrustSpec, Ship, ShipError, \
-                 GLimit, ThrustLimit, IllegalCommand
-from missile import Missile
+from .vpmath import Vec, Direction, HexVec
+from .hexfield import HexField
+from .entity import Entity
+from .ship import ThrustSpec, Ship
+from .shiperror import *
+from .missile import Missile
 
 class App(object):
 

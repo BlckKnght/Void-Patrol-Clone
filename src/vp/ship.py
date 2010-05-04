@@ -8,9 +8,8 @@ import pygame
 import pygame.display
 import pygame.draw
 
-from entity import Entity
-from shiperror import *
-from vpmath import Vec
+from .entity import Entity
+from .shiperror import *
 
 class ThrustSpec(object):
     def __init__(self, max_thrust, max_g, thrusters, spin_cost):

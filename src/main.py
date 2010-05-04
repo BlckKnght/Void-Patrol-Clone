@@ -1,4 +1,7 @@
-from src.app import App
+#!/usr/bin/env python
+# main.py
+
+from vp.app import App
 
 if __name__ == "__main__":
     try:
