@@ -29,12 +29,13 @@ from the Pygame website (http://pygame.org/download.shtml).
 
 How to Play
 
-Run the program by executing the file "vp.py".  You'll see a hex grid
-displayed on the screen, with your ship located in the center (shown by
-a triangle).  All of the locations you can move to will have one or more
-angled lines drawn on them, showing the possible facings your ship can
-reach. When you ship has gained some speed, you'll also see the potential
-locations you'll be able to go to on the following turn (in a lighter color).
+Run the program by executing the file "main.py" in the "src" directory.
+You'll see a hex grid displayed on the screen, with your ship located in the
+center (shown by a white triangle).  All of the locations you can move to
+will have one or more angled lines drawn on them, showing the possible facings
+your ship can reach. When you ship has gained some speed, you'll also see the
+potential locations you'll be able to go to on the following turn (in a
+lighter color).
 
 Your ship can be controlled by pressing keys on the keyboard using either
 of two systems:
