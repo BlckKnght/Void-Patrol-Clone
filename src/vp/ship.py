@@ -63,9 +63,10 @@ class Ship(Entity):
         self.used_thrust += self.thrust_spec.spin_cost
 
     def update(self):
-        self.used_thrust = 0
-        self.used_g = 0
-        super(Ship, self).update()
+        next = super(Ship, self).update()
+        next.used_thrust = 0
+        next.used_g = 0
+        return next
 
     def command(self, c):
         assert 4 <= c <= 9

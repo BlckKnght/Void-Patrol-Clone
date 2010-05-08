@@ -101,4 +101,21 @@ Here are some of the things planned for improving the game:
 Make it possible to move the viewport so that the fighter and missiles
 are always on the screen. - Partially done!
 
-Clean up the simulation code. It's really ugly.
+Mines which can thrust in any direction (with no turning required).
+
+New graphics to show missile threat envelopes.
+
+VP style guns, though perhaps only for point defense.
+
+Kinetic weapons which are launched with significant starting velocity,
+but which can maneuver only a little bit, like mines.
+
+Missile fuel usage.
+
+Fighter fuel useage.
+
+Fighter damage and HP.
+
+Flares, decoys, ECM and ECCM.
+
+Multiplayer! (Probably hotseat at first.)

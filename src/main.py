@@ -9,7 +9,7 @@ if __name__ == "__main__":
         a.setup_window(70, 60, 1)
         a.setup_ship()
         a.setup_missiles()
-        a.update()
+        a.setup_current_turn()
         a.loop()
     finally:
         a.quit()

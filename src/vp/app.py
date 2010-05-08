@@ -1,16 +1,8 @@
 from __future__ import division
 
-import copy
-import math
-import os
-import sys
-
 import pygame
 import pygame.display
-import pygame.draw
 import pygame.event
-import pygame.font
-import pygame.time
 from pygame.locals import *
 
 from .vpmath import Vec, Direction, HexVec
@@ -92,31 +84,40 @@ class App(object):
 
         pygame.display.flip()
 
-    def update_step(self):
-        self.sprimeprime = copy.deepcopy(self.sprime)
-        self.sprimeprime.update()
-        self.mprime = [copy.deepcopy(m) for m in self.missiles]
+    def calculate_future_states(self):
+        self.sprimeprime = self.sprime.update()
+        self.mprime = [m.update() for m in self.missiles]
         for mp in self.mprime:
-            mp.update()
             v = mp.seek(self.sprime)
             self.h.set_bottom_text(mp.id, mp.display_text(v))
 
         self.h.set_top_text("Energy",
-                            "Energy: {0}".format(self.sprime.thrust_spec.max_thrust -
-                                                 self.sprime.used_thrust))
+                            "Energy: {0}".format(
+                                self.sprime.thrust_spec.max_thrust -
+                                self.sprime.used_thrust))
         self.h.set_top_text("Gs", "G load: {0}".format(self.sprime.used_g))
         self.h.set_top_text("Position",
                                "Position: {0}".format(self.sprime.pos))
-        self.h.set_top_text("Velocity", "Speed: {0} ({1})".format(abs(self.sprime.vel),
-                                    " + ".join("{0[1]}x{0[0]}".format(c)
-                                               for c in self.sprime.vel.components())))
+        self.h.set_top_text("Velocity", "Speed: {0} ({1})".format(
+                                abs(self.sprime.vel),
+                                " + ".join("{0[1]}x{0[0]}".format(c)
+                                           for c in self.sprime.vel.components())))
         self.h.set_bottom_text("Notice", None)
 
-    def update(self):
-        self.sprime = copy.deepcopy(self.s)
-        self.sprime.update()
-        self.update_step()
+    def setup_current_turn(self):
+        self.sprime = self.s.update()
+        self.calculate_future_states()
         #self.recenter()
+
+    def next_turn(self):
+        self.s = self.sprime
+        self.missiles = []
+        for mp in self.mprime:
+            if mp.pos == self.s.pos:
+                self.h.set_bottom_text(mp.id, None)
+            else:
+                self.missiles.append(mp)
+        self.setup_current_turn()
 
     def loop(self):
         pygame.event.set_allowed(None)
@@ -132,64 +133,56 @@ class App(object):
                 try:
                     if e.key == K_k or e.key == K_KP8:
                         self.sprime.command(8)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_i or e.key == K_KP5:
                         self.sprime.command(5)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_u or e.key == K_KP7:
                         self.sprime.command(7)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_o or e.key == K_KP9:
                         self.sprime.command(9)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_j or e.key == K_KP4:
                         self.sprime.command(4)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_l or e.key == K_KP6:
                         self.sprime.command(6)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_RETURN or e.key == K_KP_ENTER:
-                        self.s = self.sprime
-##                        print [m.pos - self.s.pos for m in self.mprime]
-                        self.missiles = []
-                        for mp in self.mprime:
-                            if mp.pos == self.s.pos:
-                                self.h.set_bottom_text(mp.id, None)
-                            else:
-                                self.missiles.append(mp)
-                        self.update()
+                        self.next_turn()
                     elif e.key == K_x or e.key == K_KP0:
-                        self.update()
+                        self.setup_current_turn()
                     elif e.key == K_F1:
                         self.setup_ship("Badger", self.badger_spec)
-                        self.update()
+                        self.setup_current_turn()
                     elif e.key == K_F2:
                         self.setup_ship("Javelin", self.javelin_spec)
-                        self.update()
+                        self.setup_current_turn()
                     elif e.key == K_F3:
                         self.setup_ship("Sparrowhawk", self.sparrowhawk_spec)
-                        self.update()
+                        self.setup_current_turn()
                     elif e.key == K_F4:
                         self.setup_ship("Lone Wolf", self.lone_wolf_spec)
-                        self.update()
+                        self.setup_current_turn()
                     elif e.key == K_F5:
                         self.add_missile(5, 1)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_F6:
                         self.add_missile(6, 1)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_F7:
                         self.add_missile(7, 1)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_F8:
                         self.add_missile(8, 1)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_F9:
                         self.add_missile(7, 0)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_F10:
                         self.add_missile(9, 0)
-                        self.update_step()
+                        self.calculate_future_states()
                     elif e.key == K_F12:
                         self.recenter()
                     elif e.key == K_q or e.key == K_ESCAPE:

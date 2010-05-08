@@ -2,6 +2,8 @@
 
 from __future__ import division
 
+import copy
+
 import pygame
 import pygame.display
 import pygame.draw
@@ -32,7 +34,9 @@ class Entity(object):
             self.orientation -= 1
 
     def update(self):
-        self.pos += self.vel
+        next = copy.deepcopy(self)
+        next.pos += next.vel
+        return next
 
     def __repr__(self):
         return "Entity({0}, {1}, {2}, {3})".format(repr(self.id),
