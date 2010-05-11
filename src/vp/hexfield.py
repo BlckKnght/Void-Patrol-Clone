@@ -46,7 +46,7 @@ class HexField(object):
 
         center = screen_center - weight_center
         if (center.x + center.y) % 2 == 1:
-            center.y += 1
+            center += Vec(0,1)
 
         self.origin = center
 

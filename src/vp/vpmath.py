@@ -4,15 +4,22 @@ from __future__ import division
 
 # 6-way direction, has exactly six instances.
 class Direction(object):
+    __slots__ = "_value"
+
     _instances = [None] * 6
 
     def __new__(cls, value):
-        value %= 6
+        assert isinstance(value, int)
+        value = (value + 2) % 6 - 2
         if cls._instances[value] is None:
             cls._instances[value] = object.__new__(cls)
-            cls._instances[value].value = value
+            cls._instances[value]._value = value
 
         return cls._instances[value]
+
+    @property
+    def value(self):
+        return self._value
 
     def __getnewargs__(self):
         return (self.value,)
@@ -25,7 +32,7 @@ class Direction(object):
         """Do subtraction. This can have two different meanings.
 
         If 'rhs' is another direction, return the turns needed to go from
-        'self' to 'rhs'.
+        'self' to 'rhs', in the range of -2 to 3.
 
         If 'rhs' is an integer, return this direction rotated counter-
         clockwise by that amount."""
@@ -50,8 +57,10 @@ class Direction(object):
         return hash(self.value)
 
 
-# arbitrary dimensional vector
+# two dimensional vector
 class Vec(object):
+    __slots__ = ["_x", "_y"]
+
     _unit_vectors = [(0, -2),
                      (1, -1),
                      (1, 1),
@@ -59,23 +68,33 @@ class Vec(object):
                      (-1, 1),
                      (-1, -1)]
 
-    def __init__(self, x=0, y=0):
-        if isinstance(x, (int, float)):
-            self.x = x
-            self.y = y
-        elif isinstance(x, Vec):
-            self.x = x.x
-            self.y = x.y
-        elif isinstance(x, (tuple, list)):
-            self.x, self.y = x
-        elif isinstance(x, HexVec):
-            self.x = x.a
-            self.y = x.b - x.c
-        elif isinstance(x, Direction):
-            self.x, self.y = self._unit_vectors[x.value]
+    def __new__(cls, *values):
+        vec = object.__new__(cls)
+        if len(values) == 2:
+            vec._x, vec._y = values
+        elif len(values) == 0:
+            vec._x = 0
+            vec._y = 0
+        elif isinstance(values[0], (Vec, tuple, list)):
+            vec._x, vec._y = values[0]
+        elif isinstance(values[0], HexVec):
+            vec._x = values[0].a
+            vec._y = values[0].b - values[0].c
+        elif isinstance(values[0], Direction):
+            vec._x, vec._y = cls._unit_vectors[values[0].value]
         else:
             raise TypeError("Can't build a Vec from arguments: {0}".format(
-                            repr((x, y))))
+                            repr(values)))
+
+        return vec
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
 
     def __eq__(self, other):
         if not isinstance(other, Vec):
@@ -124,8 +143,8 @@ class Vec(object):
         return str((self.x, self.y))
 
     def __itr__(self):
-        yield x
-        yield y
+        yield self.x
+        yield self.y
 
     def __abs__(self):
         return math.sqrt(x*x + y*y)
@@ -134,6 +153,7 @@ class Vec(object):
         return hash((self.x, self.y))
 
 class HexVec(object):
+    __slots__ = "_a", "_b"
     _unit_hexvecs = [(0, -1),
                      (1, -1),
                      (1, 0),
@@ -141,30 +161,37 @@ class HexVec(object):
                      (-1, 1),
                      (-1, 0)]
 
-    def __init__(self, a=None, b=None, c=None):
-        if a is None and b is None and c is None:
-            self.a = 0
-            self.b = 0
-        elif a is None:
-            self.a = -(b+c)
-            self.b = b
-        elif isinstance(a, (int, float)):
-            if b is None:
-                b = -(a+c)
-            self.a = a
-            self.b = b
-        elif isinstance(a, Vec):
-            self.a = a.x
-            self.b = type(a.x)((a.y - a.x) / 2)
-        elif isinstance(a, Direction):
-            self.a, self.b = self._unit_hexvecs[a.value]
+    def __new__(cls, *values):
+        hv = object.__new__(cls)
+        if len(values) == 2:
+            hv._a, hv._b = values
+        elif len(values) == 0:
+            hv._a = 0
+            hv._b = 0
+        elif isinstance(values[0], (list, tuple)):
+            hv._a, hv._b = values[0]
+        elif isinstance(values[0], Vec):
+            hv._a = values[0].x
+            hv._b = type(hv._a)((values[0].y - values[0].x) / 2)
+        elif isinstance(values[0], Direction):
+            hv._a, hv._b = cls._unit_hexvecs[values[0].value]
         else:
             raise TypeError("Can't build a HexVec from arguments: {0}".format(
-                            repr((a, b, c))))
+                            repr(values)))
+
+        return hv
+
+    @property
+    def a(self):
+        return self._a
+
+    @property
+    def b(self):
+        return self._b
 
     @property
     def c(self):
-        return -(self.a + self.b)
+        return -(self._a + self._b)
 
     def __add__(self, other):
         return HexVec(self.a + other.a,
